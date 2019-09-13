@@ -70,7 +70,7 @@ class MuxUpdater<T> where T: Equatable {
 
 
 
-// Execute a list blocks, each of which can return some asynchronous result or an error; call the final completion block when all the blocks are done. If any of the blocks result in errors, then the last error object is returned to the final completion block. Useful for making parallel network request that make sense only when all of them finish with some result.
+// Execute a list of blocks, whereby each can return some asynchronous result or an error; call the final completion block when all the blocks are done. If any of the blocks result in errors, then the last error object is returned to the final completion block. Useful for making parallel network request that make sense only when all of them finish with some result.
 
 func MuxMultiRequester(_ blocks: [(@escaping (Any?, Error?) -> Void) -> Void], completion: @escaping ([Any?], Error?) -> Void) {
 	var resultCount = 0
@@ -247,7 +247,7 @@ class MuxCachingRequesterMap<T: Codable> {
 	func clear() {
 		dict.removeAll()
 		if let cacheSubdirectoryName = cacheSubdirectoryName {
-			FileManager.removeRecursively(FileManager.cacheDirectory(subDirectory: "Mux/" + cacheSubdirectoryName, create: false))
+			FileManager.removeCacheDirectory(subDirectory: "Mux/" + cacheSubdirectoryName)
 		}
 	}
 
@@ -261,9 +261,15 @@ class MuxCachingRequesterMap<T: Codable> {
 }
 
 
+
+private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
+private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
+
+
+
 extension FileManager {
 
-	fileprivate class func cacheDirectory(subDirectory: String, create: Bool) -> String {
+	class func cacheDirectory(subDirectory: String, create: Bool) -> String {
 		guard var result = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first else {
 			preconditionFailure("No cache directory")
 		}
@@ -279,12 +285,11 @@ extension FileManager {
 		return result
 	}
 
-	fileprivate class func removeRecursively(_ path: String) {
+	class func removeCacheDirectory(subDirectory: String) {
+		removeRecursively(cacheDirectory(subDirectory: subDirectory, create: false))
+	}
+
+	class func removeRecursively(_ path: String) {
 		try? `default`.removeItem(atPath: path)
 	}
 }
-
-
-private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
-private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
-
