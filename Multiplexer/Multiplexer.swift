@@ -9,7 +9,7 @@
 import Foundation
 
 
-private let STANDARD_TTL: TimeInterval = 30 * 60
+let STANDARD_TTL: TimeInterval = 30 * 60
 
 private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
 private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
@@ -79,16 +79,8 @@ class MultiplexerBase<T: Codable>: MultiplexerBaseProtocol {
 
 	// Protected
 
-	func useCachedResultOn(error: Error) -> Bool {
-		if (error as NSError).domain == NSURLErrorDomain {
-			return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((error as NSError).code)
-		}
-		return false
-	}
-
-	var timeToLive: TimeInterval {
-		return STANDARD_TTL
-	}
+	func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+	var timeToLive: TimeInterval { STANDARD_TTL }
 
 
 	// Private
@@ -109,18 +101,12 @@ class MultiplexerBase<T: Codable>: MultiplexerBaseProtocol {
 			completions.removeFirst()(result)
 		}
 	}
-}
 
 
-extension MultiplexerBase {
+	// Caching: protected
 
-	var cacheKey: String? {
-		return String(describing: type(of: self))
-	}
-
-	var cacheDomain: String? {
-		return nil
-	}
+	var cacheKey: String? { String(describing: type(of: self)) }
+	var cacheDomain: String? { nil }
 
 	func loadFromCache() -> T? {
 		if let cacheFileURL = cacheFileURL(create: false) {
@@ -152,8 +138,11 @@ extension MultiplexerBase {
 
 
 protocol MultiplexerProtocol: MultiplexerBaseProtocol {
-	func onFetch(onResult: @escaping (Result<T, Error>) -> Void) // required abstract
+	// Required abstract entities:
+	static var shared: Self { get }
+	func onFetch(onResult: @escaping Completion)
 
+	// Optional overrideables; see default implementations in MultiplexerBase
 	func useCachedResultOn(error: Error) -> Bool
 	var timeToLive: TimeInterval { get }
 	var cacheKey: String? { get }
@@ -170,3 +159,12 @@ extension MultiplexerProtocol {
 
 typealias Multiplexer<T: Codable> = MultiplexerBase<T> & MultiplexerProtocol
 
+
+extension Error {
+	var isConnectivityError: Bool {
+		if (self as NSError).domain == NSURLErrorDomain {
+			return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((self as NSError).code)
+		}
+		return false
+	}
+}
