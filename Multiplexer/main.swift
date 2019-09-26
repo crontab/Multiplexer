@@ -34,7 +34,7 @@ Test.shared.request(refresh: false) { (result) in
 }
 
 
-final class TestMap: MultiplexerMap<String, Obj> {
+final class TestMap: MultiplexerMap<Obj> {
 	static var shared: TestMap = TestMap()
 
 	func onFetch(key: String, onResult: @escaping (Result<Obj, Error>) -> Void) {

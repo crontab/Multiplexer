@@ -9,24 +9,24 @@
 import Foundation
 
 
-typealias MuxKey = Hashable & CustomStringConvertible
+typealias MuxKey = String // for various reasons it better always be a string
 
 
 internal protocol MultiplexerMapBaseProtocol {
 	associatedtype T: Codable
-	associatedtype K: MuxKey
+	typealias K = MuxKey
 	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnFetch = (K, @escaping Completion) -> Void
+	typealias OnKeyFetch = (K, @escaping Completion) -> Void
 
-	func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnFetch)
+	func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnKeyFetch)
 }
 
 
-class MultiplexerMapBase<K: MuxKey, T: Codable>: MultiplexerMapBaseProtocol {
+class MultiplexerMapBase<T: Codable>: MultiplexerMapBaseProtocol {
 	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnFetch = (K, @escaping Completion) -> Void
+	typealias OnKeyFetch = (K, @escaping Completion) -> Void
 
-	internal func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnFetch) {
+	internal func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnKeyFetch) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
@@ -160,4 +160,4 @@ extension MultiplexerMapProtocol {
 }
 
 
-typealias MultiplexerMap<K: MuxKey, T: Codable> = MultiplexerMapBase<K, T> & MultiplexerMapProtocol
+typealias MultiplexerMap<T: Codable> = MultiplexerMapBase<T> & MultiplexerMapProtocol
