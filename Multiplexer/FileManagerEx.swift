@@ -31,7 +31,9 @@ extension FileManager {
 		removeRecursively(cacheDirectory(subDirectory: subDirectory, create: false))
 	}
 
-	class func removeRecursively(_ url: URL) {
-		try? `default`.removeItem(at: url)
+	class func removeRecursively(_ url: URL?) {
+		if let url = url {
+			try? `default`.removeItem(at: url)
+		}
 	}
 }

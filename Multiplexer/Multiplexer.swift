@@ -11,8 +11,8 @@ import Foundation
 
 let STANDARD_TTL: TimeInterval = 30 * 60
 
-private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
-private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
+internal let jsonDecoder: JSONDecoder = { JSONDecoder() }()
+internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 
 internal protocol MultiplexerBaseProtocol {
@@ -24,21 +24,52 @@ internal protocol MultiplexerBaseProtocol {
 }
 
 
-class MultiplexerBase<T: Codable>: MultiplexerBaseProtocol {
+internal class MultiplexFetcher<T: Codable> {
+	typealias Completion = (Result<T, Error>) -> Void
+
+	internal var completions: [Completion] = []
+	internal var completionTime: TimeInterval?
+	internal var previousValue: T?
+
+	internal func resultAvailable(ttl: TimeInterval) -> Bool {
+		guard let completionTime = completionTime else {
+			return false
+		}
+		return Date().timeIntervalSinceReferenceDate <= completionTime + ttl
+	}
+
+	internal func append(completion: @escaping Completion) -> Bool {
+		completions.append(completion)
+		return completions.count > 1
+	}
+
+	internal func complete(result: Result<T, Error>) {
+		while !completions.isEmpty {
+			completions.removeFirst()(result)
+		}
+	}
+
+	func clearMemory() {
+		completionTime = nil
+		previousValue = nil
+	}
+}
+
+
+class MultiplexerBase<T: Codable>: MultiplexFetcher<T>, MultiplexerBaseProtocol {
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnFetch = (@escaping Completion) -> Void
 
 	internal func request(refresh: Bool, completion: @escaping Completion, onFetch: @escaping OnFetch) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && resultAvailable, let previousValue = previousValue {
+		if !refresh && resultAvailable(ttl: timeToLive), let previousValue = previousValue {
 			completion(.success(previousValue))
 			return
 		}
 
 		// Append the completion block to the list of blocks to be notified when the result is available; fetch the object only if this is the first such completion block
-		completions.append(completion)
-		if completions.count > 1 {
+		if append(completion: completion) {
 			return
 		}
 
@@ -53,12 +84,12 @@ class MultiplexerBase<T: Codable>: MultiplexerBaseProtocol {
 				self.complete(result: newResult)
 
 			case .failure(let error):
-				self.completionTime = nil
 				if self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? self.loadFromCache() {
 					self.previousValue = cachedValue
 					self.complete(result: .success(cachedValue))
 				}
 				else {
+					self.completionTime = nil
 					self.previousValue = nil
 					self.complete(result: newResult)
 				}
@@ -66,47 +97,18 @@ class MultiplexerBase<T: Codable>: MultiplexerBaseProtocol {
 		}
 	}
 
-	func clearMemory() {
-		completionTime = nil
-		previousValue = nil
-	}
-
 	func clear() {
 		clearMemory()
 		clearCache()
 	}
 
-
-	// Protected
-
-	func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
-	var timeToLive: TimeInterval { STANDARD_TTL }
-
-
-	// Private
-
-	private var completions: [Completion] = []
-	private var completionTime: TimeInterval?
-	private var previousValue: T?
-
-	private var resultAvailable: Bool {
-		guard let completionTime = completionTime else {
-			return false
-		}
-		return Date().timeIntervalSinceReferenceDate <= completionTime + timeToLive
-	}
-
-	private func complete(result: Result<T, Error>) {
-		while !completions.isEmpty {
-			completions.removeFirst()(result)
-		}
-	}
-
-
 	// Caching: protected
 
+	func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+
+	var timeToLive: TimeInterval { STANDARD_TTL }
+
 	var cacheKey: String? { String(describing: type(of: self)) }
-	var cacheDomain: String? { nil }
 
 	func loadFromCache() -> T? {
 		if let cacheFileURL = cacheFileURL(create: false) {
@@ -123,14 +125,12 @@ class MultiplexerBase<T: Codable>: MultiplexerBaseProtocol {
 	}
 
 	func clearCache() {
-		if let cacheFileURL = cacheFileURL(create: false) {
-			FileManager.removeRecursively(cacheFileURL)
-		}
+		FileManager.removeRecursively(cacheFileURL(create: false))
 	}
 
-	private func cacheFileURL(create: Bool) -> URL? {
+	func cacheFileURL(create: Bool) -> URL? {
 		if let cacheKey = cacheKey {
-			return FileManager.cacheDirectory(subDirectory: "Mux/" + (cacheDomain ?? ""), create: create).appendingPathComponent(cacheKey).appendingPathExtension("json")
+			return FileManager.cacheDirectory(subDirectory: "Mux/", create: create).appendingPathComponent(cacheKey).appendingPathExtension("json")
 		}
 		return nil
 	}
@@ -146,7 +146,6 @@ protocol MultiplexerProtocol: MultiplexerBaseProtocol {
 	func useCachedResultOn(error: Error) -> Bool
 	var timeToLive: TimeInterval { get }
 	var cacheKey: String? { get }
-	var cacheDomain: String? { get }
 }
 
 
@@ -158,13 +157,3 @@ extension MultiplexerProtocol {
 
 
 typealias Multiplexer<T: Codable> = MultiplexerBase<T> & MultiplexerProtocol
-
-
-extension Error {
-	var isConnectivityError: Bool {
-		if (self as NSError).domain == NSURLErrorDomain {
-			return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((self as NSError).code)
-		}
-		return false
-	}
-}

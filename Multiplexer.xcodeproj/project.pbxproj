@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608F76F233D585200B3A713 /* MultiplexerMap.swift */; };
+		3608F772233D6A2000B3A713 /* ErrorEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608F771233D6A2000B3A713 /* ErrorEx.swift */; };
 		367774C6233C9815009D9ECC /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367774C5233C9815009D9ECC /* Common.swift */; };
 		36876793233CAA76004205DA /* Multiplexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36876792233CAA76004205DA /* Multiplexer.swift */; };
 		36D46FED233BF30E008E9AF9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D46FEC233BF30E008E9AF9 /* main.swift */; };
@@ -26,6 +28,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3608F76F233D585200B3A713 /* MultiplexerMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiplexerMap.swift; sourceTree = "<group>"; };
+		3608F771233D6A2000B3A713 /* ErrorEx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorEx.swift; sourceTree = "<group>"; };
 		367774C5233C9815009D9ECC /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		36876792233CAA76004205DA /* Multiplexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multiplexer.swift; sourceTree = "<group>"; };
 		36D46FE9233BF30E008E9AF9 /* Multiplexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Multiplexer; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,8 +68,10 @@
 			isa = PBXGroup;
 			children = (
 				367774C5233C9815009D9ECC /* Common.swift */,
+				3608F771233D6A2000B3A713 /* ErrorEx.swift */,
 				36F35CCE233BFCAE000FEB77 /* FileManagerEx.swift */,
 				36876792233CAA76004205DA /* Multiplexer.swift */,
+				3608F76F233D585200B3A713 /* MultiplexerMap.swift */,
 				36D46FEC233BF30E008E9AF9 /* main.swift */,
 			);
 			path = Multiplexer;
@@ -132,7 +138,9 @@
 				36F35CCF233BFCAE000FEB77 /* FileManagerEx.swift in Sources */,
 				367774C6233C9815009D9ECC /* Common.swift in Sources */,
 				36D46FED233BF30E008E9AF9 /* main.swift in Sources */,
+				3608F772233D6A2000B3A713 /* ErrorEx.swift in Sources */,
 				36876793233CAA76004205DA /* Multiplexer.swift in Sources */,
+				3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
