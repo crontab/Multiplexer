@@ -1,2 +1,2 @@
-# MuxUtils
- Functional-style utilities for Swift. Documentation coming soon. Promise.
+# Multiplexer
+ Async utilities with caching for Swift. Documentation coming soon. Promise.
