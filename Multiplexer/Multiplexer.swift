@@ -15,15 +15,6 @@ internal let jsonDecoder: JSONDecoder = { JSONDecoder() }()
 internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 
-internal protocol MultiplexerBaseProtocol {
-	associatedtype T: Codable
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnFetch = (@escaping Completion) -> Void
-
-	func request(refresh: Bool, completion: @escaping Completion, onFetch: @escaping OnFetch)
-}
-
-
 internal class MultiplexFetcher<T: Codable> {
 	typealias Completion = (Result<T, Error>) -> Void
 
@@ -56,7 +47,7 @@ internal class MultiplexFetcher<T: Codable> {
 }
 
 
-class MultiplexerBase<T: Codable>: MultiplexFetcher<T>, MultiplexerBaseProtocol {
+class MultiplexerBase<T: Codable>: MultiplexFetcher<T> {
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnFetch = (@escaping Completion) -> Void
 
@@ -137,7 +128,13 @@ class MultiplexerBase<T: Codable>: MultiplexFetcher<T>, MultiplexerBaseProtocol 
 }
 
 
-protocol MultiplexerProtocol: MultiplexerBaseProtocol {
+internal protocol MultiplexerProtocol {
+	associatedtype T: Codable
+	typealias Completion = (Result<T, Error>) -> Void
+	typealias OnFetch = (@escaping Completion) -> Void
+
+	func request(refresh: Bool, completion: @escaping Completion, onFetch: @escaping OnFetch)
+
 	// Required abstract entities:
 	static var shared: Self { get }
 	func onFetch(onResult: @escaping Completion)

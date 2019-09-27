@@ -9,20 +9,8 @@
 import Foundation
 
 
-typealias MuxKey = String // for various reasons it better always be a string
-
-
-internal protocol MultiplexerMapBaseProtocol {
-	associatedtype T: Codable
-	typealias K = MuxKey
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnKeyFetch = (K, @escaping Completion) -> Void
-
-	func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnKeyFetch)
-}
-
-
-class MultiplexerMapBase<T: Codable>: MultiplexerMapBaseProtocol {
+class MultiplexerMapBase<T: Codable> {
+	typealias K = String
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnKeyFetch = (K, @escaping Completion) -> Void
 
@@ -141,7 +129,14 @@ class MultiplexerMapBase<T: Codable>: MultiplexerMapBaseProtocol {
 }
 
 
-protocol MultiplexerMapProtocol: MultiplexerMapBaseProtocol {
+internal protocol MultiplexerMapProtocol {
+	associatedtype T: Codable
+	typealias K = String
+	typealias Completion = (Result<T, Error>) -> Void
+	typealias OnKeyFetch = (K, @escaping Completion) -> Void
+
+	func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnKeyFetch)
+
 	// Required abstract entities:
 	static var shared: Self { get }
 	func onFetch(key: K, onResult: @escaping Completion)
