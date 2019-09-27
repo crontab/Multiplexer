@@ -59,7 +59,7 @@ class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 	func request(refresh: Bool, completion: @escaping Completion) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && resultAvailable(ttl: timeToLive), let previousValue = previousValue {
+		if !refresh && resultAvailable(ttl: Self.timeToLive), let previousValue = previousValue {
 			completion(.success(previousValue))
 			return
 		}
@@ -76,11 +76,11 @@ class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 			case .success(let newValue):
 				self.completionTime = Date().timeIntervalSinceReferenceDate
 				self.previousValue = newValue
-				self.saveToCache(newValue)
+				Self.saveToCache(newValue)
 				self.complete(result: newResult)
 
 			case .failure(let error):
-				if self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? self.loadFromCache() {
+				if Self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? Self.loadFromCache() {
 					self.previousValue = cachedValue
 					self.complete(result: .success(cachedValue))
 				}
@@ -95,36 +95,36 @@ class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 
 	func clear() {
 		clearMemory()
-		clearCache()
+		Self.clearCache()
 	}
 
 	// Caching: protected
 
-	func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
-	var timeToLive: TimeInterval { STANDARD_TTL }
+	class var timeToLive: TimeInterval { STANDARD_TTL }
 
-	var cacheKey: String? { String(describing: type(of: self)) }
+	class var cacheKey: String? { String(describing: T.self) }
 
-	func loadFromCache() -> T? {
+	class func loadFromCache() -> T? {
 		if let cacheFileURL = cacheFileURL(create: false) {
 			return try? jsonDecoder.decode(T.self, from: Data(contentsOf: cacheFileURL))
 		}
 		return nil
 	}
 
-	func saveToCache(_ result: T) {
+	class func saveToCache(_ result: T) {
 		if let cacheFileURL = cacheFileURL(create: true) {
 			DLOG("Multiplexer: storing to \(cacheFileURL)")
 			try! jsonEncoder.encode(result).write(to: cacheFileURL, options: .atomic)
 		}
 	}
 
-	func clearCache() {
+	class func clearCache() {
 		FileManager.removeRecursively(cacheFileURL(create: false))
 	}
 
-	func cacheFileURL(create: Bool) -> URL? {
+	class func cacheFileURL(create: Bool) -> URL? {
 		if let cacheKey = cacheKey {
 			return FileManager.cacheDirectory(subDirectory: "Mux/", create: create).appendingPathComponent(cacheKey).appendingPathExtension("json")
 		}
