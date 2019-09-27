@@ -16,9 +16,7 @@ struct Obj: Codable {
 
 
 let test = Multiplexer<Obj> { onResult in
-	DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-		onResult(.success(Obj(id: "0", name: "HM")))
-	}
+	onResult(.success(Obj(id: "0", name: "HM")))
 }
 
 test.request(refresh: false) { (result) in
@@ -30,9 +28,7 @@ test.request(refresh: false) { (result) in
 
 
 let testMap = MultiplexerMap<Obj> { (key, onResult) in
-	DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-		onResult(.success(Obj(id: key, name: "User \(key)")))
-	}
+	onResult(.success(Obj(id: key, name: "User \(key)")))
 }
 
 
@@ -47,4 +43,5 @@ testMap.request(refresh: false, key: "1") { (result) in
 }
 
 
-RunLoop.main.run()
+test.clear()
+testMap.clear()

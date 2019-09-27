@@ -9,12 +9,6 @@
 import Foundation
 
 
-let STANDARD_TTL: TimeInterval = 30 * 60
-
-internal let jsonDecoder: JSONDecoder = { JSONDecoder() }()
-internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
-
-
 internal class MultiplexFetcher<T: Codable> {
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnFetch = (@escaping Completion) -> Void
@@ -48,7 +42,7 @@ internal class MultiplexFetcher<T: Codable> {
 }
 
 
-class Multiplexer<T: Codable>: MultiplexFetcher<T> {
+class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 
 	private let onFetch: OnFetch
 
@@ -59,7 +53,7 @@ class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 	func request(refresh: Bool, completion: @escaping Completion) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && resultAvailable(ttl: Self.timeToLive), let previousValue = previousValue {
+		if !refresh && resultAvailable(ttl: C.timeToLive), let previousValue = previousValue {
 			completion(.success(previousValue))
 			return
 		}
@@ -76,11 +70,11 @@ class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 			case .success(let newValue):
 				self.completionTime = Date().timeIntervalSinceReferenceDate
 				self.previousValue = newValue
-				Self.saveToCache(newValue)
+				C.saveToCache(newValue)
 				self.complete(result: newResult)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? Self.loadFromCache() {
+				if C.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? C.loadFromCache() {
 					self.previousValue = cachedValue
 					self.complete(result: .success(cachedValue))
 				}
@@ -95,39 +89,9 @@ class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 
 	func clear() {
 		clearMemory()
-		Self.clearCache()
-	}
-
-	// Caching: protected
-
-	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
-
-	class var timeToLive: TimeInterval { STANDARD_TTL }
-
-	class var cacheKey: String? { String(describing: T.self) }
-
-	class func loadFromCache() -> T? {
-		if let cacheFileURL = cacheFileURL(create: false) {
-			return try? jsonDecoder.decode(T.self, from: Data(contentsOf: cacheFileURL))
-		}
-		return nil
-	}
-
-	class func saveToCache(_ result: T) {
-		if let cacheFileURL = cacheFileURL(create: true) {
-			DLOG("Multiplexer: storing to \(cacheFileURL)")
-			try! jsonEncoder.encode(result).write(to: cacheFileURL, options: .atomic)
-		}
-	}
-
-	class func clearCache() {
-		FileManager.removeRecursively(cacheFileURL(create: false))
-	}
-
-	class func cacheFileURL(create: Bool) -> URL? {
-		if let cacheKey = cacheKey {
-			return FileManager.cacheDirectory(subDirectory: "Mux/", create: create).appendingPathComponent(cacheKey).appendingPathExtension("json")
-		}
-		return nil
+		C.clearCache()
 	}
 }
+
+
+typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
