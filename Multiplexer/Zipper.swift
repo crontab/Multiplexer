@@ -52,6 +52,7 @@ class Zipper {
 				results.append(result)
 				if results.count == self.fetchers.count {
 					completion(results)
+					self.fetchers = []
 				}
 			}
 		}
