@@ -71,21 +71,26 @@ func z() {
 // z()
 
 print(Date())
-var d: Debouncer<Int>?
+var d: Debouncer?
+var value: Int = 1
 
-d = Debouncer(initialValue: 1, delay: 3) { (value) in
+d = Debouncer(delay: 3) {
 	print(Date(), "Triggered", value)
-	// d = nil
+	d = nil
 }
 
-d?.update(newValue: 2)
-print("Update", d?.value ?? "nil")
+value = 2
+// print("Update", value)
+d?.update()
 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-	d?.update(newValue: 3)
-	print("Update", d?.value ?? "nil")
+	value = 3
+	// print("Update", value)
+	d?.update()
+	d = nil
 	DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-		d?.update(newValue: 4)
-		print("Update", d?.value ?? "nil")
+		value = 4
+		// print("Update", value)
+		d?.update()
 	}
 }
 

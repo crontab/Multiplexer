@@ -9,43 +9,36 @@
 import Foundation
 
 
-class Debouncer<T> {
+class Debouncer {
 
-	init(initialValue: T, delay: TimeInterval, onTrigger: @escaping (T) -> Void) {
+	init(delay: TimeInterval, onTrigger: @escaping () -> Void) {
 		self.delay = delay
-		self.value = initialValue
 		self.onTrigger = onTrigger
 	}
 
-	private (set) var value: T
-
-	func update(newValue: T) {
-		value = newValue
-		if let onTrigger = onTrigger {
-			self.workItem?.cancel()
-			var workItem: DispatchWorkItem!
-			workItem = DispatchWorkItem {
-				if !workItem.isCancelled {
-					onTrigger(self.value)
-				}
+	func update() {
+		guard onTrigger != nil else {
+			return
+		}
+		counter += 1
+		let capturedCounter = counter
+		DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+			if let onTrigger = self.onTrigger, self.counter == capturedCounter {
+				onTrigger()
 			}
-			self.workItem = workItem
-			DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
 		}
 	}
 
 	func cancel() {
-		workItem?.cancel()
-		workItem = nil
+		onTrigger = nil
 	}
 
-	private var onTrigger: ((T) -> Void)?
+	private var onTrigger: (() -> Void)?
 	private var delay: TimeInterval
-	private var workItem: DispatchWorkItem?
+	private var counter: UInt64 = 0
 
 	deinit {
-		workItem?.cancel()
-		workItem = nil
+		cancel()
 		print("Debouncer: deinit")
 	}
 }
