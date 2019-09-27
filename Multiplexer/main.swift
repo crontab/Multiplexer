@@ -9,6 +9,32 @@
 import Foundation
 
 
+class Zipper {
+	// typealias AnyResult = Result<Any, Error>
+	typealias OnResult<T> = (Result<T, Error>) -> Void
+	typealias Promise<T> = (_ onResult: @escaping OnResult<T>) -> Void
+
+	private var promises: [Promise<Any>] = []
+	private var results: [Any?] = []
+	private var lastError: Error?
+
+	func add<T>(type: T.Type, promise: @escaping Promise<T>) -> Self {
+		promises.append(promise as! Promise<Any>)
+		return self
+	}
+
+	func add<T: Codable>(refresh: Bool, multiplexer: Multiplexer<T>) -> Self {
+		return add(type: T.self) { (onResult) in
+			multiplexer.request(refresh: refresh, completion: onResult)
+		}
+	}
+
+	func zip() {
+	}
+}
+
+
+
 struct Obj: Codable {
 	var id: String
 	var name: String
