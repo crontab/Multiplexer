@@ -68,6 +68,25 @@ func z() {
 		}
 }
 
-z()
+// z()
+
+print(Date())
+var d: Debouncer<Int>?
+
+d = Debouncer(initialValue: 1, delay: 3) { (value) in
+	print(Date(), "Triggered", value)
+	// d = nil
+}
+
+d?.update(newValue: 2)
+print("Update", d?.value ?? "nil")
+DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+	d?.update(newValue: 3)
+	print("Update", d?.value ?? "nil")
+	DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+		d?.update(newValue: 4)
+		print("Update", d?.value ?? "nil")
+	}
+}
 
 RunLoop.main.run()
