@@ -9,6 +9,16 @@
 import Foundation
 
 
+extension Error {
+	var isConnectivityError: Bool {
+		if (self as NSError).domain == NSURLErrorDomain {
+			return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((self as NSError).code)
+		}
+		return false
+	}
+}
+
+
 internal class MultiplexFetcher<T: Codable> {
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnFetch = (@escaping Completion) -> Void
@@ -43,8 +53,6 @@ internal class MultiplexFetcher<T: Codable> {
 
 
 class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
-
-	private let onFetch: OnFetch
 
 	init(onFetch: @escaping OnFetch) {
 		self.onFetch = onFetch
@@ -91,6 +99,8 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 		clearMemory()
 		C.clearCache()
 	}
+
+	private let onFetch: OnFetch
 }
 
 

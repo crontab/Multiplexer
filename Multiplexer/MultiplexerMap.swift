@@ -14,8 +14,6 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnKeyFetch = (K, @escaping Completion) -> Void
 
-	private let onKeyFetch: OnKeyFetch
-
 	init(onKeyFetch: @escaping OnKeyFetch) {
 		self.onKeyFetch = onKeyFetch
 	}
@@ -77,10 +75,9 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 		C.clearCacheMap()
 	}
 
-	// Private
-
 	private typealias Fetcher = MultiplexFetcher<T>
 
+	private let onKeyFetch: OnKeyFetch
 	private var fetcherMap: [K: Fetcher] = [:]
 
 	private func fetcherForKey(_ key: K) -> Fetcher {

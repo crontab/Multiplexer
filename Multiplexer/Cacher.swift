@@ -50,6 +50,31 @@ final class NoCacher<T: Codable>: Cacher {
 }
 
 
+extension FileManager {
+
+	class func cacheDirectory(subDirectory: String, create: Bool) -> URL {
+		guard let result = `default`.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(subDirectory) else {
+			preconditionFailure("No cache directory")
+		}
+		if create && !`default`.fileExists(atPath: result.path) {
+			do {
+				try `default`.createDirectory(at: result, withIntermediateDirectories: true, attributes: nil)
+			}
+			catch {
+				preconditionFailure("Couldn't create cache directory (\(result))")
+			}
+		}
+		return result
+	}
+
+	class func removeRecursively(_ url: URL?) {
+		if let url = url {
+			try? `default`.removeItem(at: url)
+		}
+	}
+}
+
+
 final class JSONDiskCacher<T: Codable>: Cacher {
 
 	static func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
@@ -98,6 +123,3 @@ final class JSONDiskCacher<T: Codable>: Cacher {
 		return FileManager.cacheDirectory(subDirectory: "Mux/" + cacheDomain + ".Map", create: create)
 	}
 }
-
-
-
