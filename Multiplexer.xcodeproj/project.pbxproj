@@ -11,6 +11,7 @@
 		3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608F76F233D585200B3A713 /* MultiplexerMap.swift */; };
 		36876793233CAA76004205DA /* Multiplexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36876792233CAA76004205DA /* Multiplexer.swift */; };
 		36D46FED233BF30E008E9AF9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D46FEC233BF30E008E9AF9 /* main.swift */; };
+		36E310B0233EB67600E4E049 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E310AF233EB67600E4E049 /* Zipper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,6 +32,7 @@
 		36876792233CAA76004205DA /* Multiplexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multiplexer.swift; sourceTree = "<group>"; };
 		36D46FE9233BF30E008E9AF9 /* Multiplexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Multiplexer; sourceTree = BUILT_PRODUCTS_DIR; };
 		36D46FEC233BF30E008E9AF9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		36E310AF233EB67600E4E049 /* Zipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zipper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				36043926233DEC050043FDB6 /* Cacher.swift */,
 				36876792233CAA76004205DA /* Multiplexer.swift */,
 				3608F76F233D585200B3A713 /* MultiplexerMap.swift */,
+				36E310AF233EB67600E4E049 /* Zipper.swift */,
 				36D46FEC233BF30E008E9AF9 /* main.swift */,
 			);
 			path = Multiplexer;
@@ -131,6 +134,7 @@
 			files = (
 				36043927233DEC050043FDB6 /* Cacher.swift in Sources */,
 				36D46FED233BF30E008E9AF9 /* main.swift in Sources */,
+				36E310B0233EB67600E4E049 /* Zipper.swift in Sources */,
 				36876793233CAA76004205DA /* Multiplexer.swift in Sources */,
 				3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */,
 			);
