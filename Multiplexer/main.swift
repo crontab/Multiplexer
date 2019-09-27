@@ -15,40 +15,32 @@ struct Obj: Codable {
 }
 
 
-final class Test: Multiplexer<Obj> {
-	static var shared: Test = { Test() }()
-
-	func onFetch(onResult: @escaping (Result<Obj, Error>) -> Void) {
-		DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-			onResult(.success(Obj(id: "0", name: "HM")))
-		}
+let test = Multiplexer<Obj> { onResult in
+	DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+		onResult(.success(Obj(id: "0", name: "HM")))
 	}
 }
 
-
-Test.shared.request(refresh: false) { (result) in
+test.request(refresh: false) { (result) in
 	print(result)
-	Test.shared.request(refresh: false) { (result) in
+	test.request(refresh: false) { (result) in
 		print(result)
 	}
 }
 
 
-final class TestMap: MultiplexerMap<Obj> {
-	static var shared: TestMap = TestMap()
-
-	func onFetch(key: String, onResult: @escaping (Result<Obj, Error>) -> Void) {
-		DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-			onResult(.success(Obj(id: key, name: "User \(key)")))
-		}
+let testMap = MultiplexerMap<Obj> { (key, onResult) in
+	DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+		onResult(.success(Obj(id: key, name: "User \(key)")))
 	}
 }
 
-TestMap.shared.request(refresh: false, key: "1") { (result) in
+
+testMap.request(refresh: false, key: "1") { (result) in
 	print(result)
-	TestMap.shared.request(refresh: false, key: "1") { (result) in
+	testMap.request(refresh: false, key: "1") { (result) in
 		print(result)
-		TestMap.shared.request(refresh: false, key: "2") { (result) in
+		testMap.request(refresh: false, key: "2") { (result) in
 			print(result)
 		}
 	}

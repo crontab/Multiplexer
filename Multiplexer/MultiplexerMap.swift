@@ -9,12 +9,19 @@
 import Foundation
 
 
-class MultiplexerMapBase<T: Codable> {
+class MultiplexerMap<T: Codable> {
 	typealias K = String
 	typealias Completion = (Result<T, Error>) -> Void
 	typealias OnKeyFetch = (K, @escaping Completion) -> Void
 
-	internal func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnKeyFetch) {
+	private let onKeyFetch: OnKeyFetch
+
+	init(onKeyFetch: @escaping OnKeyFetch) {
+		self.onKeyFetch = onKeyFetch
+	}
+
+
+	internal func request(refresh: Bool, key: K, completion: @escaping Completion) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
@@ -29,7 +36,7 @@ class MultiplexerMapBase<T: Codable> {
 		}
 
 		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in cache for subsequent use
-		onFetch(key) { (newResult) in
+		onKeyFetch(key) { (newResult) in
 			switch newResult {
 
 			case .success(let newValue):
@@ -127,32 +134,3 @@ class MultiplexerMapBase<T: Codable> {
 		return fetcher!
 	}
 }
-
-
-internal protocol MultiplexerMapProtocol {
-	associatedtype T: Codable
-	typealias K = String
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnKeyFetch = (K, @escaping Completion) -> Void
-
-	func request(refresh: Bool, key: K, completion: @escaping Completion, onFetch: @escaping OnKeyFetch)
-
-	// Required abstract entities:
-	static var shared: Self { get }
-	func onFetch(key: K, onResult: @escaping Completion)
-
-	// Optional overrideables; see default implementations in MultiplexerMapBase
-	func useCachedResultOn(error: Error) -> Bool
-	var timeToLive: TimeInterval { get }
-	var cacheDomain: String? { get }
-}
-
-
-extension MultiplexerMapProtocol {
-	func request(refresh: Bool, key: K, completion: @escaping Completion) {
-		request(refresh: refresh, key: key, completion: completion, onFetch: onFetch)
-	}
-}
-
-
-typealias MultiplexerMap<T: Codable> = MultiplexerMapBase<T> & MultiplexerMapProtocol

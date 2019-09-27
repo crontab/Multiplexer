@@ -17,6 +17,7 @@ internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 internal class MultiplexFetcher<T: Codable> {
 	typealias Completion = (Result<T, Error>) -> Void
+	typealias OnFetch = (@escaping Completion) -> Void
 
 	internal var completions: [Completion] = []
 	internal var completionTime: TimeInterval?
@@ -47,11 +48,15 @@ internal class MultiplexFetcher<T: Codable> {
 }
 
 
-class MultiplexerBase<T: Codable>: MultiplexFetcher<T> {
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnFetch = (@escaping Completion) -> Void
+class Multiplexer<T: Codable>: MultiplexFetcher<T> {
 
-	internal func request(refresh: Bool, completion: @escaping Completion, onFetch: @escaping OnFetch) {
+	private let onFetch: OnFetch
+
+	init(onFetch: @escaping OnFetch) {
+		self.onFetch = onFetch
+	}
+
+	func request(refresh: Bool, completion: @escaping Completion) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
 		if !refresh && resultAvailable(ttl: timeToLive), let previousValue = previousValue {
@@ -126,31 +131,3 @@ class MultiplexerBase<T: Codable>: MultiplexFetcher<T> {
 		return nil
 	}
 }
-
-
-internal protocol MultiplexerProtocol {
-	associatedtype T: Codable
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnFetch = (@escaping Completion) -> Void
-
-	func request(refresh: Bool, completion: @escaping Completion, onFetch: @escaping OnFetch)
-
-	// Required abstract entities:
-	static var shared: Self { get }
-	func onFetch(onResult: @escaping Completion)
-
-	// Optional overrideables; see default implementations in MultiplexerBase
-	func useCachedResultOn(error: Error) -> Bool
-	var timeToLive: TimeInterval { get }
-	var cacheKey: String? { get }
-}
-
-
-extension MultiplexerProtocol {
-	func request(refresh: Bool, completion: @escaping Completion) {
-		request(refresh: refresh, completion: completion, onFetch: onFetch)
-	}
-}
-
-
-typealias Multiplexer<T: Codable> = MultiplexerBase<T> & MultiplexerProtocol
