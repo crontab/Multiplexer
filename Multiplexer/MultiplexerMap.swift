@@ -40,11 +40,11 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 			case .success(let newValue):
 				fetcher.completionTime = Date().timeIntervalSinceReferenceDate
 				fetcher.previousValue = newValue
-				C.saveToCache(newValue, key: key)
+				C.saveToCache(newValue, key: key, domain: Self.cacheDomain)
 				fetcher.complete(result: newResult)
 
 			case .failure(let error):
-				if C.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key) {
+				if C.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
 					fetcher.previousValue = cachedValue
 					fetcher.complete(result: .success(cachedValue))
 				}
@@ -67,13 +67,15 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 
 	func clear(key: K) {
 		clearMemory(key: key)
-		C.clearCache(key: key)
+		C.clearCache(key: key, domain: Self.cacheDomain)
 	}
 
 	func clear() {
 		clearMemory()
-		C.clearCacheMap()
+		C.clearCacheMap(domain: Self.cacheDomain)
 	}
+
+	class var cacheDomain: String { String(describing: T.self) }
 
 	private typealias Fetcher = MultiplexFetcher<T>
 
