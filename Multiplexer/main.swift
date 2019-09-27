@@ -81,16 +81,15 @@ d = Debouncer(delay: 3) {
 
 value = 2
 // print("Update", value)
-d?.update()
+d?.touch()
 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
 	value = 3
 	// print("Update", value)
-	d?.update()
-	d = nil
+	d?.touch()
 	DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
 		value = 4
 		// print("Update", value)
-		d?.update()
+		d?.touch()
 	}
 }
 

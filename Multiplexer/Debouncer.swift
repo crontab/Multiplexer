@@ -16,7 +16,7 @@ class Debouncer {
 		self.onTrigger = onTrigger
 	}
 
-	func update() {
+	func touch() {
 		guard onTrigger != nil else {
 			return
 		}
@@ -39,6 +39,26 @@ class Debouncer {
 
 	deinit {
 		cancel()
-		print("Debouncer: deinit")
 	}
+}
+
+
+class ValueDebouncer<T: Equatable>: Debouncer {
+
+	init(_ initialValue: T, delay: TimeInterval, onTrigger: @escaping () -> Void) {
+		_value = initialValue
+		super.init(delay: delay, onTrigger: onTrigger)
+	}
+
+	var value: T {
+		get { _value }
+		set {
+			if _value != newValue {
+				_value = newValue
+				touch()
+			}
+		}
+	}
+
+	private var _value: T
 }
