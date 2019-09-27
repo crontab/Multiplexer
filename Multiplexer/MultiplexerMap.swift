@@ -23,7 +23,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && fetcher.resultAvailable(ttl: C.timeToLive), let previousValue = fetcher.previousValue {
+		if !refresh && fetcher.resultAvailable(ttl: Self.timeToLive), let previousValue = fetcher.previousValue {
 			completion(.success(previousValue))
 			return
 		}
@@ -44,7 +44,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 				fetcher.complete(result: newResult)
 
 			case .failure(let error):
-				if C.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
+				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
 					fetcher.previousValue = cachedValue
 					fetcher.complete(result: .success(cachedValue))
 				}
@@ -74,6 +74,10 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 		clearMemory()
 		C.clearCacheMap(domain: Self.cacheDomain)
 	}
+
+	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+
+	class var timeToLive: TimeInterval { STANDARD_TTL }
 
 	class var cacheDomain: String { String(describing: T.self) }
 

@@ -54,17 +54,20 @@ testMap.clear()
 */
 
 
-Zipper()
-	.add({ (completion) in
-		DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-			completion(.success("Hello"))
+func z() {
+	Zipper()
+		.add({ (completion) in
+			DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+				completion(.success("Hello"))
+			}
+		})
+		.add(refresh: false, multiplexer: test)
+		.add(refresh: false, key: "1", multiplexer: testMap)
+		.sync { (results) in
+			results.forEach { print($0) }
 		}
-	})
-	.add(refresh: false, multiplexer: test)
-	.add(refresh: false, key: "1", multiplexer: testMap)
-	.sync { (results) in
-		results.forEach { print($0) }
-	}
+}
 
+z()
 
 RunLoop.main.run()

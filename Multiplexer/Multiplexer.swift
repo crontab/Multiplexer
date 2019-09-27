@@ -9,6 +9,9 @@
 import Foundation
 
 
+let STANDARD_TTL: TimeInterval = 30 * 60
+
+
 extension Error {
 	var isConnectivityError: Bool {
 		if (self as NSError).domain == NSURLErrorDomain {
@@ -61,7 +64,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 	func request(refresh: Bool, completion: @escaping Completion) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && resultAvailable(ttl: C.timeToLive), let previousValue = previousValue {
+		if !refresh && resultAvailable(ttl: Self.timeToLive), let previousValue = previousValue {
 			completion(.success(previousValue))
 			return
 		}
@@ -82,7 +85,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 				self.complete(result: newResult)
 
 			case .failure(let error):
-				if C.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
+				if Self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
 					self.previousValue = cachedValue
 					self.complete(result: .success(cachedValue))
 				}
@@ -99,6 +102,10 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 		clearMemory()
 		C.clearCache(key: Self.cacheKey, domain: nil)
 	}
+
+	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+
+	class var timeToLive: TimeInterval { STANDARD_TTL }
 
 	class var cacheKey: String { String(describing: T.self) }
 

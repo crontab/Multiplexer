@@ -9,8 +9,6 @@
 import Foundation
 
 
-let STANDARD_TTL: TimeInterval = 30 * 60
-
 internal let jsonDecoder: JSONDecoder = { JSONDecoder() }()
 internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
@@ -18,9 +16,6 @@ internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 protocol Cacher {
 	associatedtype T: Codable
 	typealias K = String
-
-	static func useCachedResultOn(error: Error) -> Bool
-	static var timeToLive: TimeInterval { get }
 
 	static func loadFromCache<T: Codable>(key: K, domain: String?) -> T?
 	static func saveToCache<T: Codable>(_ result: T, key: K, domain: String?)
@@ -30,9 +25,6 @@ protocol Cacher {
 
 
 final class NoCacher<T: Codable>: Cacher {
-	static func useCachedResultOn(error: Error) -> Bool { false }
-	static var timeToLive: TimeInterval { 0 }
-
 	static func loadFromCache<T: Codable>(key: K, domain: String?) -> T? { nil }
 	static func saveToCache<T: Codable>(_ result: T, key: K, domain: String?) { }
 	static func clearCache(key: K, domain: String?) { }
@@ -59,10 +51,6 @@ extension FileManager {
 
 
 final class JSONDiskCacher<T: Codable>: Cacher {
-
-	static func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
-
-	static var timeToLive: TimeInterval { STANDARD_TTL }
 
 	static func loadFromCache<T: Codable>(key: K, domain: String?) -> T? {
 		return try? jsonDecoder.decode(T.self, from: Data(contentsOf: cacheFileURL(key: key, domain: domain, create: false)))
