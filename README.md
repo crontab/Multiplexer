@@ -158,7 +158,7 @@ See also:
 - `func request(refresh: Bool, key: String, completion: @escaping OnResult)`
 - `flush()`
 - `clear()`
-- `Multiplexer<T>`
+- `Multiplexer`
 - `MuxRepository`
 - `Zipper`
 

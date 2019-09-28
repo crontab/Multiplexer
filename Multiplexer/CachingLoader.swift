@@ -112,6 +112,7 @@ class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProto
 	}
 
 
+	///
 	/// Convenience alias to `request(url:progress:completion:)`. Retrieves a media object from the given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. There is no expiration in this case unlike the Multiplexer family of interfaces. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported here as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
 	/// - parameter url: remote (non-file) URL of the media object to be retrieved.
 	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`
