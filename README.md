@@ -14,7 +14,7 @@
 <a name="intro"></a>
 ## 1. Introduction
 
-The Swift Multiplexer utility suite provides a browser-like request/caching layer for network objects, all based on callbacks. Its implementation is pretty straightforward and (hopefully) pretty well documented here and in the source files. Most importantly, you will be surprised how simple Multiplexer's interfaces are.
+The Swift Multiplexer utility suite provides a browser-like request/caching layer for network objects, all based on callbacks. Its interfaces are pretty straightforward and (hopefully) pretty well documented here and in the source files.
 
 Here are the scenarios that are covered by the Multiplexer utilities:
 
@@ -86,11 +86,11 @@ See also:
 
 - `init(onFetch: @escaping (@escaping OnResult) -> Void)`
 - `func request(refresh: Bool, completion: @escaping OnResult)`
-- `MultiplexerMap<T>` interface
+- `MultiplexerMap`
 
 ### Caching
 
-By default, `Multiplexer<T>` can store objects as JSON files in the local cache directory. This is done by explicitly calling `flush()` on the multiplexer object, or alternatively `flushAll()` on the global repository `MuxRepository` if the object is registered there.
+By default, `Multiplexer<T>` can store objects as JSON files in the local cache directory. This is done by explicitly calling `flush()` on the multiplexer object, or alternatively `flushAll()` on the global repository `MuxRepository` if the multiplexer object is registered there.
 
 In the current implementation, the objects stored on disk can be reused only in one case: when your `onFetch` fails due to a connectivity problem. This behavior is defined in the `useCachedResultOn(error:)` class method that can be overridden in your subclass of `Multiplexer`. For the memory cache, the expiration logic is defined by the class variable `timeToLive`, which defaults to 30 minutes and can also be overridden in your subclass.
 
