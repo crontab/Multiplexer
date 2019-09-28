@@ -8,6 +8,15 @@
 
 import Foundation
 
+class Backend {
+	static func fetch(completion: @escaping (Result<Obj, Error>) -> Void) {
+		DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+			print("Fetching test")
+			completion(.success(Obj(id: "0", name: "HM")))
+		}
+	}
+}
+
 
 struct Obj: Codable {
 	var id: String
@@ -15,12 +24,7 @@ struct Obj: Codable {
 }
 
 
-let test = Multiplexer<Obj>(onFetch: { onResult in
-	DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-		print("Fetching test")
-		onResult(.success(Obj(id: "0", name: "HM")))
-	}
-}).register()
+let test = Multiplexer<Obj>(onFetch: Backend.fetch).register()
 
 let testMap = MultiplexerMap<Obj>(onKeyFetch: { (key, onResult) in
 	DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

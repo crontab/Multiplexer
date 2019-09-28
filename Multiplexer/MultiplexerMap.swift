@@ -15,9 +15,8 @@ typealias MultiplexerMap<T: Codable> = MultiplexerMapBase<T, JSONDiskCacher<T>>
 class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	typealias K = String
 	typealias OnResult = (Result<T, Error>) -> Void
-	typealias OnKeyFetch = (K, @escaping OnResult) -> Void
 
-	init(onKeyFetch: @escaping OnKeyFetch) {
+	init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
 		self.onKeyFetch = onKeyFetch
 	}
 
@@ -92,7 +91,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 
 	private typealias Fetcher = MultiplexFetcher<T>
 
-	private let onKeyFetch: OnKeyFetch
+	private let onKeyFetch: (K, @escaping OnResult) -> Void
 	private var fetcherMap: [K: Fetcher] = [:]
 
 	private func fetcherForKey(_ key: K) -> Fetcher {
