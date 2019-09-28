@@ -81,7 +81,8 @@ extension MultiplexerMapBase {
 
 extension CachingLoaderBase {
 
-	/// Register the `CachingLoaderBase<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()`. Flushing has no effect in this case since media files are stored in file anyway.
+	/// Register the `CachingLoaderBase<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()`. Flushing has no effect in this case since media files are stored in files anyway.
+	@discardableResult
 	func register() -> Self {
 		MuxRepository.register(mux: self)
 		return self

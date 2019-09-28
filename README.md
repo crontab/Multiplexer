@@ -8,6 +8,7 @@
 2. [Multiplexer](#multiplexer)
 3. [MultiplexerMap](#multiplexer-map)
 4. [Media downloaders](#media-downloaders)
+5. [MuxRepository](#mux-repository)
 99. [Authors](#authors)
 
 <a name="intro"></a>
@@ -17,7 +18,7 @@ The Swift Multiplexer utility suite provides a browser-like request/caching laye
 
 Here are the scenarios that are covered by the Multiplexer utilities:
 
-**Scenario 1:** execute an async block, typically a network call, and return the result to one or more callers. Various parts of your app may be requesting e.g. the user's profile simultaneously at program startup; you want to make sure the network request is performed only once, then the result is returned to all parts of the app that requested the object. We call this **multiplexing**.
+**Scenario 1:** execute an async block, typically a network call, and return the result to one or more callers. Various parts of your app may be requesting e.g. the user's profile simultaneously at program startup; you want to make sure the network request is performed only once, then the result is returned to all parts of the app that requested the object. We call it **multiplexing** (not to be confused with multiplexing in networking).
 
 Additionally, provide caching of the result in memory for a certain period of time. Subsequent calls to this multiplexer may return the cached result unless some time-to-live (TTL) elapses, in which case a new network call is made transparently.
 
@@ -198,7 +199,22 @@ These two interfaces don't support "soft refresh" as it is assumed that media fi
 
 In addition, both ImageLoader and MediaLoader can be added to the MuxRepository for `clearAll()` calls; both are also supported by the Zipper interface.
 
-More detailed descriptions on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/CachingLoader.swift).
+More information on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/CachingLoader.swift).
+
+<a name="mux-repository"></a>
+## MuxRepository
+
+`MuxRepository` is a static interface that can be used for centralized operations such as `clearAll()` and `flushAll()` on all multiplexer/downloader instances in your app. You should register each instance using the `register()` method on each multiplexer or downloader instance. Note that MuxRepository retains the objects, which generally should not be a problem for singletons. Use `unregister()` in case you need to release an instance previously registered with the repository.
+
+By default, the Multiplexer and MultiplexerMap interfaces don't store objects on disk. If you want to keep the objects to ensure they can survive app reboots, call `MuxRepository.flushAll()` in your app's `applicationWillResignActive(_:)` and `applicationWillTerminate(_:)` (both, because the former is not called in certain scenarios, such as a low battery shutdown). Make sure `flushAll()` is performed only once, since in some scenarios both - applicationWillTerminate and applicationWillResignActive - can be called by the system.
+
+`MuxRepository.clearAll()` discards all memory and disk objects. This is useful when e.g. the user signs out of your system and you need to make sure no traces are left of data related to the given user in memory or disk.
+
+Registration example:
+
+```swift
+let myProfile = Multiplexer<UserProfile>(onFetch: Backend.fetchMyProfile).register()
+```
 
 <a name="intro"></a>
 ## Authors
@@ -208,4 +224,4 @@ MuxUtils is developed by Hovik Melikyan. The source code is free to use, fork an
 ---
 
 
-*Documentation for Zipper, Debouncer, MuxRepository and the media downloader family interfaces coming soon*
+*Documentation for Zipper and Debouncer are coming soon*
