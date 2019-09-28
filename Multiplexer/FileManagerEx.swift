@@ -24,4 +24,8 @@ extension FileManager {
 			try? `default`.removeItem(at: url)
 		}
 	}
+
+	class func exists(_ url: URL) -> Bool {
+		return url.isFileURL && `default`.fileExists(atPath: url.path)
+	}
 }

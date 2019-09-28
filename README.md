@@ -18,7 +18,9 @@ Support "soft" and "hard" refreshes, like the browser's Cmd-R and related functi
 
 **Scenario 2:** have a dictionary of multiplexers that request and cache objects of the same type by their symbolic ID, e.g. user profiles.
 
-**Scenario 3:** combine various multiplexers into a single async call; return the results to the caller when all of them are available. Useful when e.g. you need to combine different object types in a single UI element, such as a table, i.e. if the UI element can be displayed only when all of the network objects are available at once.
+**Scenario 3:** provide media file downloading and disk caching, ensuring there is only one download process for each remote object at a time. In addition to disk caching, cache some limited number of media objects in memory for faster access.
+
+**Scenario 4:** combine various multiplexers into a single async call; return the results to the caller when all of them are available. Useful when e.g. you need to combine different object types in a single UI element, such as a table, i.e. if the UI element can be displayed only when all of the network objects are available at once.
 
 And some bonus utilities, such as a debouncer.
 
@@ -153,4 +155,4 @@ More detailed descriptions on each method can be found in the source file Multip
 ---
 
 
-*Descriptions for Cacher, Zipper, Debouncer and MuxRepository coming soon*
+*Descriptions for Zipper, Debouncer, MuxRepository and the media downloader family interfaces coming soon*

@@ -16,6 +16,9 @@
 		36D46FED233BF30E008E9AF9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D46FEC233BF30E008E9AF9 /* main.swift */; };
 		36E310B0233EB67600E4E049 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E310AF233EB67600E4E049 /* Zipper.swift */; };
 		36E310B2233EB88B00E4E049 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E310B1233EB88B00E4E049 /* Debouncer.swift */; };
+		36E8FDA9233FA99300E34B07 /* CachingLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDA7233FA99200E34B07 /* CachingLoader.swift */; };
+		36E8FDAA233FA99300E34B07 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDA8233FA99300E34B07 /* FileDownloader.swift */; };
+		36E8FDAC233FAA0E00E34B07 /* StringEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDAB233FAA0E00E34B07 /* StringEx.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +45,10 @@
 		36E310AF233EB67600E4E049 /* Zipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zipper.swift; sourceTree = "<group>"; };
 		36E310B1233EB88B00E4E049 /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
 		36E8FDA6233F94B400E34B07 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		36E8FDA7233FA99200E34B07 /* CachingLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingLoader.swift; sourceTree = "<group>"; };
+		36E8FDA8233FA99300E34B07 /* FileDownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
+		36E8FDAB233FAA0E00E34B07 /* StringEx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringEx.swift; sourceTree = "<group>"; };
+		36E8FDAD233FAB7900E34B07 /* ObjC-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ObjC-Bridging.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,15 +82,19 @@
 		36D46FEB233BF30E008E9AF9 /* Multiplexer */ = {
 			isa = PBXGroup;
 			children = (
-				3657A1D0233F46C600450AAE /* FileManagerEx.swift */,
-				3657A1D2233F46E000450AAE /* ErrorEx.swift */,
-				36043926233DEC050043FDB6 /* Cacher.swift */,
 				36876792233CAA76004205DA /* Multiplexer.swift */,
 				3608F76F233D585200B3A713 /* MultiplexerMap.swift */,
+				36E8FDA8233FA99300E34B07 /* FileDownloader.swift */,
+				36E8FDA7233FA99200E34B07 /* CachingLoader.swift */,
 				3657A1D4233F4A5C00450AAE /* MuxRepository.swift */,
 				36E310AF233EB67600E4E049 /* Zipper.swift */,
 				36E310B1233EB88B00E4E049 /* Debouncer.swift */,
+				3657A1D0233F46C600450AAE /* FileManagerEx.swift */,
+				3657A1D2233F46E000450AAE /* ErrorEx.swift */,
+				36E8FDAB233FAA0E00E34B07 /* StringEx.swift */,
+				36043926233DEC050043FDB6 /* Cacher.swift */,
 				36D46FEC233BF30E008E9AF9 /* main.swift */,
+				36E8FDAD233FAB7900E34B07 /* ObjC-Bridging.h */,
 			);
 			path = Multiplexer;
 			sourceTree = "<group>";
@@ -153,7 +164,10 @@
 				3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */,
 				36E310B2233EB88B00E4E049 /* Debouncer.swift in Sources */,
 				3657A1D5233F4A5C00450AAE /* MuxRepository.swift in Sources */,
+				36E8FDAA233FA99300E34B07 /* FileDownloader.swift in Sources */,
 				3657A1D1233F46C600450AAE /* FileManagerEx.swift in Sources */,
+				36E8FDAC233FAA0E00E34B07 /* StringEx.swift in Sources */,
+				36E8FDA9233FA99300E34B07 /* CachingLoader.swift in Sources */,
 				3657A1D3233F46E000450AAE /* ErrorEx.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -217,6 +231,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "Multiplexer/ObjC-Bridging.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -270,6 +285,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "Multiplexer/ObjC-Bridging.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
