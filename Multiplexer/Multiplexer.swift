@@ -9,6 +9,9 @@
 import Foundation
 
 
+typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
+
+
 let STANDARD_TTL: TimeInterval = 30 * 60
 
 
@@ -17,14 +20,11 @@ internal class MultiplexFetcher<T: Codable> {
 	typealias OnFetch = (@escaping OnResult) -> Void
 
 	internal var completions: [OnResult] = []
-	internal var completionTime: TimeInterval?
+	internal var completionTime: TimeInterval = 0
 	internal var previousValue: T?
 
-	internal func resultAvailable(ttl: TimeInterval) -> Bool {
-		guard let completionTime = completionTime else {
-			return false
-		}
-		return Date().timeIntervalSinceReferenceDate <= completionTime + ttl
+	internal func isExpired(ttl: TimeInterval) -> Bool {
+		return Date().timeIntervalSinceReferenceDate > completionTime + ttl
 	}
 
 	internal func append(completion: @escaping OnResult) -> Bool {
@@ -39,13 +39,13 @@ internal class MultiplexFetcher<T: Codable> {
 	}
 
 	func clearMemory() {
-		completionTime = nil
+		completionTime = 0
 		previousValue = nil
 	}
 }
 
 
-class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
+class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 
 	init(onFetch: @escaping OnFetch) {
 		self.onFetch = onFetch
@@ -54,7 +54,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 	func request(refresh: Bool, completion: @escaping OnResult) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && resultAvailable(ttl: Self.timeToLive), let previousValue = previousValue {
+		if !refresh, let previousValue = previousValue, !isExpired(ttl: Self.timeToLive) {
 			completion(.success(previousValue))
 			return
 		}
@@ -71,17 +71,16 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 			case .success(let newValue):
 				self.completionTime = Date().timeIntervalSinceReferenceDate
 				self.previousValue = newValue
-				C.saveToCache(newValue, key: Self.cacheKey, domain: nil)
 				self.complete(result: newResult)
 
 			case .failure(let error):
 				if Self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
+					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					self.previousValue = cachedValue
 					self.complete(result: .success(cachedValue))
 				}
 				else {
-					self.completionTime = nil
-					self.previousValue = nil
+					self.clearMemory()
 					self.complete(result: newResult)
 				}
 			}
@@ -93,6 +92,12 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 		C.clearCache(key: Self.cacheKey, domain: nil)
 	}
 
+	func flush() {
+		if let previousValue = previousValue {
+			C.saveToCache(previousValue, key: Self.cacheKey, domain: nil)
+		}
+	}
+
 	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
 	class var timeToLive: TimeInterval { STANDARD_TTL }
@@ -101,6 +106,3 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 
 	private let onFetch: OnFetch
 }
-
-
-typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>

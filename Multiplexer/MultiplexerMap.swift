@@ -9,7 +9,10 @@
 import Foundation
 
 
-class MultiplexerMapBase<T: Codable, C: Cacher> {
+typealias MultiplexerMap<T: Codable> = MultiplexerMapBase<T, JSONDiskCacher<T>>
+
+
+class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	typealias K = String
 	typealias OnResult = (Result<T, Error>) -> Void
 	typealias OnKeyFetch = (K, @escaping OnResult) -> Void
@@ -23,7 +26,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh && fetcher.resultAvailable(ttl: Self.timeToLive), let previousValue = fetcher.previousValue {
+		if !refresh, let previousValue = fetcher.previousValue, !fetcher.isExpired(ttl: Self.timeToLive) {
 			completion(.success(previousValue))
 			return
 		}
@@ -40,7 +43,6 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 			case .success(let newValue):
 				fetcher.completionTime = Date().timeIntervalSinceReferenceDate
 				fetcher.previousValue = newValue
-				C.saveToCache(newValue, key: key, domain: Self.cacheDomain)
 				fetcher.complete(result: newResult)
 
 			case .failure(let error):
@@ -49,8 +51,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 					fetcher.complete(result: .success(cachedValue))
 				}
 				else {
-					fetcher.completionTime = nil
-					fetcher.previousValue = nil
+					fetcher.clearMemory()
 					fetcher.complete(result: newResult)
 				}
 			}
@@ -75,6 +76,14 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 		C.clearCacheMap(domain: Self.cacheDomain)
 	}
 
+	func flush() {
+		fetcherMap.forEach { (key, fetcher) in
+			if let previousValue = fetcher.previousValue {
+				C.saveToCache(previousValue, key: key, domain: Self.cacheDomain)
+			}
+		}
+	}
+
 	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
 	class var timeToLive: TimeInterval { STANDARD_TTL }
@@ -95,6 +104,3 @@ class MultiplexerMapBase<T: Codable, C: Cacher> {
 		return fetcher!
 	}
 }
-
-
-typealias MultiplexerMap<T: Codable> = MultiplexerMapBase<T, JSONDiskCacher<T>>

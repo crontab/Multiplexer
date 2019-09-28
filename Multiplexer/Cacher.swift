@@ -9,10 +9,6 @@
 import Foundation
 
 
-private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
-private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
-
-
 protocol Cacher {
 	associatedtype T: Codable
 	typealias K = String
@@ -30,6 +26,10 @@ final class NoCacher<T: Codable>: Cacher {
 	static func clearCache(key: K, domain: String?) { }
 	static func clearCacheMap(domain: String) { }
 }
+
+
+private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
+private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 
 final class JSONDiskCacher<T: Codable>: Cacher {
