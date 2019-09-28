@@ -4,12 +4,12 @@
 
 #### Table of contents
 
-1. [Introduction](#intro)
-2. [Multiplexer](#multiplexer)
-3. [MultiplexerMap](#multiplexer-map)
-4. [Media downloaders](#media-downloaders)
-5. [MuxRepository](#mux-repository)
-99. [Authors](#authors)
+- [Introduction](#intro)
+- [Multiplexer](#multiplexer)
+- [MultiplexerMap](#multiplexer-map)
+- [Media downloaders](#media-downloaders)
+- [MuxRepository](#mux-repository)
+- [Authors](#authors)
 
 <a name="intro"></a>
 ## 1. Introduction
@@ -35,7 +35,7 @@ Support "soft" and "hard" refreshes, like the browser's Cmd-R and related functi
 And some bonus utilities, such as the Debouncer.
 
 <a name="multiplexer"></a>
-## 2. Multiplexer<T>
+## Multiplexer<T>
 
 `Multiplexer<T>` is an asynchronous, callback-based caching facility for client apps. Each multiplxer instance can manage retrieval, multiplexing and caching of one object of type `T: Codable`, therefore it is best to define each multiplexer instance in your app as a singleton.
 
@@ -88,7 +88,7 @@ See also:
 - `func request(refresh: Bool, completion: @escaping OnResult)`
 - `MultiplexerMap<T>` interface
 
-### 2.1 Caching
+### Caching
 
 By default, `Multiplexer<T>` can store objects as JSON files in the local cache directory. This is done by explicitly calling `flush()` on the multiplexer object, or alternatively `flushAll()` on the global repository `MuxRepository` if the object is registered there.
 
@@ -115,7 +115,7 @@ See also:
 More detailed descriptions on each method can be found in the source file [Multiplexer.swift](Multiplexer/Multiplexer.swift).
 
 <a name="multiplexer-map"></a>
-## 3. MultiplexerMap<T>
+## MultiplexerMap<T>
 
 `MultiplexerMap<T>` is similar to `Multiplexer<T>` in many ways except it maintains a dictionary of objects of the same type. One example would be e.g. user profile objects in your social app.
 
@@ -165,7 +165,7 @@ See also:
 More detailed descriptions on each method can be found in the source file [MultiplexerMap.swift](Multiplexer/MultiplexerMap.swift).
 
 <a name="media-downloaders"></a>
-## 4. Media downloaders
+## Media downloaders
 
 `ImageLoader` and `MediaLoader` are two multiplexing and caching interfaces designed specifically for media files used in your app. The difference between them is in that ImageLoader returns UIImage (or NSImage on macOS). Up to a certain number of UIImage/NSImage objects are cached in memory for faster access. By contrast, MediaLoader is for larger media files that are supposed to be streamed from a local file; therefore the result type returned by this interface is a path to a local cache file.
 
