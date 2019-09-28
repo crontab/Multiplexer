@@ -12,7 +12,7 @@ import Foundation
 class FileDownloader: NSObject, URLSessionDownloadDelegate {
 
 	typealias Progress = (Int64, Int64) -> Void
-	typealias Completion = (URL?, Error?) -> Void
+	typealias Completion = (Result<URL, Error>) -> Void
 
 	private var progress: Progress?
 	private var completion: Completion
@@ -43,14 +43,14 @@ class FileDownloader: NSObject, URLSessionDownloadDelegate {
 
 	func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
 		// `error` can be nil after a successful download; we don't need this event
-		if error != nil {
-			completion(nil, error)
+		if let error = error {
+			completion(.failure(error))
 		}
 		session.finishTasksAndInvalidate()
 	}
 
 	func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-		completion(location, nil)
+		completion(.success(location))
 		session.finishTasksAndInvalidate()
 	}
 }

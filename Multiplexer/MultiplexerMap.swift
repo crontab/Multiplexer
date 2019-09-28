@@ -27,10 +27,10 @@ class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	/// Instantiates a `MultiplexerMap<T>` object with a given `onKeyFetch` block. It's important to ensure that for each given object collection there is only one MultiplexerMap singleton in the app.
 	/// - parameter onKeyFetch: this block should retrieve an object by its ID, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
+
 	init(onKeyFetch: @escaping (String, @escaping OnResult) -> Void) {
 		self.onKeyFetch = onKeyFetch
 	}
-
 
 	///
 	/// Performs a request either by calling the `onKeyFetch` block supplied in the constructor, or by returning the previously cached object, if available, by its ID passed as the `key` parameter. Multiple simultaneous calls to `request(...)` are handled by the MultiplexerMap so that only one `onKeyFetch` operation can be invoked for each object ID at a time, but all callers of `request(...)` will eventually receive the result, whether asynchronously or synchronously.
@@ -38,6 +38,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	/// - parameter key: object ID that will be passed to onKeyFetch
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
+
 	internal func request(refresh: Bool, key: String, completion: @escaping OnResult) {
 		let fetcher = fetcherForKey(key)
 
@@ -52,7 +53,7 @@ class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 			return
 		}
 
-		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in cache for subsequent use
+		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in memory for subsequent use
 		onKeyFetch(key) { (newResult) in
 			switch newResult {
 

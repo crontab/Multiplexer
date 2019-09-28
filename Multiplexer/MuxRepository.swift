@@ -77,3 +77,18 @@ extension MultiplexerMapBase {
 		MuxRepository.unregister(mux: self)
 	}
 }
+
+
+extension CachingLoaderBase {
+
+	/// Register the `CachingLoaderBase<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()`. Flushing has no effect in this case since media files are stored in file anyway.
+	func register() -> Self {
+		MuxRepository.register(mux: self)
+		return self
+	}
+
+	/// Unregister the `CachingLoaderBase<T>` from the global repository `MuxRepository`. Not required for singleton multiplexers.
+	func unregister() {
+		MuxRepository.unregister(mux: self)
+	}
+}

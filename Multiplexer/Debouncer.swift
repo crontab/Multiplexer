@@ -36,10 +36,6 @@ class Debouncer {
 	private var onTrigger: (() -> Void)?
 	private var delay: TimeInterval
 	private var counter: UInt64 = 0
-
-	deinit {
-		cancel()
-	}
 }
 
 

@@ -45,6 +45,12 @@ class Zipper {
 		}
 	}
 
+	func add<T: AnyObject>(url: URL, mediaLoader: CachingLoaderBase<T>) -> Self {
+		return add(type: T.self) { (onResult) in
+			mediaLoader.request(url: url, completion: onResult)
+		}
+	}
+
 	func sync(completion: @escaping (_ results: [Result<Any, Error>]) -> Void) {
 		var results: [Result<Any, Error>] = []
 		fetchers.forEach { fetcher in

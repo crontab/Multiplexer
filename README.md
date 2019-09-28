@@ -1,34 +1,44 @@
 
 # Multiplexer Utilities - *Work in progress*
-### Async utilities with caching for Swift 5.1+
+### Async utilities with caching for Swift
 
-The Swift Multiplexer utility suite provides a browser-like request/caching layer for network objects, all based on callbacks. Its implementation is pretty straightforward and (hopefully) pretty well documented here and in the source files.
+#### Table of contents
 
-Most importantly, you will be surprised how simple Multiplexer's interfaces are. No, probably even simpler than you think.
+1. [Introduction](#intro)
+2. [Multiplexer](#multiplexer)
+3. [MultiplexerMap](#multiplexer-map)
+4. [Media downloaders](#media-downloaders)
+99. [Authors](#authors)
 
-Firstly, let's see what scenarios are covered by the Multiplexer utilities:
+<a name="intro"></a>
+## 1. Introduction
 
-**Scenario 1:** execute an async block, typically a network call, and return the result to one or more callers. Various parts of your app may be requesting e.g. the user's profile simultaneously at program startup; you want to make sure the network request is performed only once, then return the result to all parts of the app that requested the object.
+The Swift Multiplexer utility suite provides a browser-like request/caching layer for network objects, all based on callbacks. Its implementation is pretty straightforward and (hopefully) pretty well documented here and in the source files. Most importantly, you will be surprised how simple Multiplexer's interfaces are.
 
-Additionally, provide caching of the result in memory for a certain period of time. Subsequent calls to this multiplexer may return the cached result unless some time-to-live expires, in which case a new network call is made transparently.
+Here are the scenarios that are covered by the Multiplexer utilities:
 
-This multiplexer can be configured to use disk caching in addition to memory caching. Another possibility is to have this multiplexer return a previously known result regardless of its TTL if the latest network call resulted in one of the specific types of errors, such as network connectivity/reachability errors.
+**Scenario 1:** execute an async block, typically a network call, and return the result to one or more callers. Various parts of your app may be requesting e.g. the user's profile simultaneously at program startup; you want to make sure the network request is performed only once, then the result is returned to all parts of the app that requested the object. We call this **multiplexing**.
+
+Additionally, provide caching of the result in memory for a certain period of time. Subsequent calls to this multiplexer may return the cached result unless some time-to-live (TTL) elapses, in which case a new network call is made transparently.
+
+This multiplexer can be configured to use disk caching in addition to memory caching. Another possibility is to have this multiplexer return a previously known result regardless of its TTL if the latest network call resulted in one of the specific types of failures, such as network connectivity errors.
 
 Support "soft" and "hard" refreshes, like the browser's Cmd-R and related functions.
 
 **Scenario 2:** have a dictionary of multiplexers that request and cache objects of the same type by their symbolic ID, e.g. user profiles.
 
-**Scenario 3:** provide media file downloading and disk caching, ensuring there is only one download process for each remote object at a time. In addition to disk caching, cache some limited number of media objects in memory for faster access.
+**Scenario 3:** provide media file downloading, multiplexing and disk caching. In addition to disk caching, some limited number of media objects can be cached in memory for faster access.
 
 **Scenario 4:** combine various multiplexers into a single async call; return the results to the caller when all of them are available. Useful when e.g. you need to combine different object types in a single UI element, such as a table, i.e. if the UI element can be displayed only when all of the network objects are available at once.
 
-And some bonus utilities, such as a debouncer.
+And some bonus utilities, such as the Debouncer.
 
-## 1. Multiplexer<T>
+<a name="multiplexer"></a>
+## 2. Multiplexer<T>
 
-`Multiplexer<T>` is an asynchronous, callback-based caching facility for client apps. Each multiplxer instance can manage retrieval and caching of one object of type `T: Codable`, therefore it is best to define each multiplexer instance in your app as a singleton.
+`Multiplexer<T>` is an asynchronous, callback-based caching facility for client apps. Each multiplxer instance can manage retrieval, multiplexing and caching of one object of type `T: Codable`, therefore it is best to define each multiplexer instance in your app as a singleton.
 
-For each multiplexer singleton you define a block that implements asynchronous retrieval of the object, which in your app will likely be a network request, e.g. to your backend system.
+For each multiplexer singleton you define a block that implements asynchronous retrieval of the object, which in your app will likely be a network request to your backend system.
 
 A multiplexer singleton guarantees that there will only be one fetch/retrieval operation made, and that subsequently a memory-cached object will be returned to the callers of its `request(...)` method , unless the cached object expires according to the `timeToLive` setting (defaults to 30 minutes). Additionally, Multiplexer can store the object on disk - see `flush()` and also the discussion on `request(refresh:completion:)`.
 
@@ -40,7 +50,7 @@ class Backend {
 }
 ```
 
-Then an instantiation of a multiplexer singleton may look like:
+Then an instantiation of a multiplexer singleton will look like:
 
 ```swift
 let myProfile = Multiplexer<UserProfile>(onFetch: { onResult in
@@ -77,7 +87,7 @@ See also:
 - `func request(refresh: Bool, completion: @escaping OnResult)`
 - `MultiplexerMap<T>` interface
 
-### Caching
+### 2.1 Caching
 
 By default, `Multiplexer<T>` can store objects as JSON files in the local cache directory. This is done by explicitly calling `flush()` on the multiplexer object, or alternatively `flushAll()` on the global repository `MuxRepository` if the object is registered there.
 
@@ -86,7 +96,7 @@ In the current implementation, the objects stored on disk can be reused only in 
 The storage method can be changed by defining a class that conforms to `Cacher`, possibly with a generic parameter for the basic object type. For example you can define your own cacher that uses CoreData, called `CDCacher<T>`, then define your new multiplexer class as:
 
 ```swift
-typealias CDMultiplexer<T: Codable> = MultiplexerBase<T, CDCacher<T>>
+typealias MyCDMultiplexer<T: Codable> = MultiplexerBase<T, CDCacher<T>>
 ```
 
 At run time, you can invalidate the cached object using one of the following methods:
@@ -98,12 +108,13 @@ See also:
 
 - `flush()`
 - `clear()`
-- `Cacher` interface
-- `MuxRepository` interface
+- `MuxRepository`
+- `Zipper`
 
-More detailed descriptions on each method can be found in the source file Multiplexer.swift.
+More detailed descriptions on each method can be found in the source file [Multiplexer.swift](Multiplexer/Multiplexer.swift).
 
-## 2. MultiplexerMap<T>
+<a name="multiplexer-map"></a>
+## 3. MultiplexerMap<T>
 
 `MultiplexerMap<T>` is similar to `Multiplexer<T>` in many ways except it maintains a dictionary of objects of the same type. One example would be e.g. user profile objects in your social app.
 
@@ -146,13 +157,55 @@ See also:
 - `func request(refresh: Bool, key: String, completion: @escaping OnResult)`
 - `flush()`
 - `clear()`
-- `Multiplexer<T>` interface
-- `Cacher` interface
-- `MuxRepository` interface
+- `Multiplexer<T>`
+- `MuxRepository`
+- `Zipper`
 
-More detailed descriptions on each method can be found in the source file MultiplexerMap.swift.
+More detailed descriptions on each method can be found in the source file [MultiplexerMap.swift](Multiplexer/MultiplexerMap.swift).
+
+<a name="media-downloaders"></a>
+## 4. Media downloaders
+
+`ImageLoader` and `MediaLoader` are two multiplexing and caching interfaces designed specifically for media files used in your app. The difference between them is in that ImageLoader returns UIImage (or NSImage on macOS). Up to a certain number of UIImage/NSImage objects are cached in memory for faster access. By contrast, MediaLoader is for larger media files that are supposed to be streamed from a local file; therefore the result type returned by this interface is a path to a local cache file.
+
+Both interfaces provide singleton objects called `main` that should be used in your app.
+
+Examples:
+
+```swift
+let imageURL = "https://i.imgur.com/QXYqnI9.jpg"
+
+ImageLoader.main.request(url: URL(string: imageURL)!) { result in
+	self.imageView.image = try? result.get()
+}
+
+let audioURL = "https://freesound.org/people/mojuba/sounds/474800/download/474800__mojuba__sacre-cur-paris-ambient-sound.mp3"
+
+MediaLoader.main.request(url: URL(string: audioURL)!) { result in
+	switch result {
+	case .failure(let error)
+		print(error)
+	case .success(let object):
+		self.player = AVPlayer(url: object.fileURL)
+		self.player.play()
+	}
+}
+```
+
+Like MultiplexerMap, the media loader interfaces ensure only one download process can be initiated at a time.
+
+These two interfaces don't support "soft refresh" as it is assumed that media files are immutable, i.e. one URL can point to an object that never changes and therefore can be cached indefinitely.
+
+In addition, both ImageLoader and MediaLoader can be added to the MuxRepository for `clearAll()` calls; both are also supported by the Zipper interface.
+
+More detailed descriptions on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/CachingLoader.swift).
+
+<a name="intro"></a>
+## Authors
+
+MuxUtils is developed by Hovik Melikyan. The source code is free to use, fork and modify; "free" as in "free as a bird".
 
 ---
 
 
-*Descriptions for Zipper, Debouncer, MuxRepository and the media downloader family interfaces coming soon*
+*Documentation for Zipper, Debouncer, MuxRepository and the media downloader family interfaces coming soon*

@@ -15,6 +15,7 @@ For each multiplexer singleton you define a block that implements asynchronous r
 
 See README.md for a more detailed discussion.
 */
+
 typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
 
 
@@ -58,16 +59,17 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 	/// Instantiates a `Multiplexer<T>` object with a given `onFetch` block. It's important to ensure that for each given singular object there is only one Multiplexer singleton in the app.
 	/// - parameter onFetch: this block should retrieve an object, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
+
 	init(onFetch: @escaping (@escaping OnResult) -> Void) {
 		self.onFetch = onFetch
 	}
-
 
 	///
 	/// Performs a request either by calling the `onFetch` block supplied in the multiplexer's constructor, or by returning the previously cached object, if available. Multiple simultaneous calls to `request(...)` are handled by the Multiplexer so that only one `onFetch` operation can be invoked at a time, but all callers of `request(...)` will eventually receive the result, whether asynchronously or synchronously.
 	/// - parameter refresh: whether to perform a "soft" refresh. Most of the time you will set it to false unless, e.g. you have updated the remote object and want to receive a fresher copy of it.
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
+
 	func request(refresh: Bool, completion: @escaping OnResult) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
@@ -81,7 +83,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 			return
 		}
 
-		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in cache for subsequent use
+		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in memory for subsequent use
 		onFetch { (newResult) in
 			switch newResult {
 

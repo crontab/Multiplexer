@@ -8,6 +8,7 @@
 
 import Foundation
 
+
 class Backend {
 	static func fetch(completion: @escaping (Result<Obj, Error>) -> Void) {
 		DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -34,29 +35,32 @@ let testMap = MultiplexerMap<Obj>(onKeyFetch: { (key, onResult) in
 }).register()
 
 
-test.request(refresh: false) { (result) in
-	print(result)
+func m() {
+
 	test.request(refresh: false) { (result) in
 		print(result)
-	}
-}
-
-
-testMap.request(refresh: false, key: "1") { (result) in
-	print(result)
-	testMap.request(refresh: false, key: "1") { (result) in
-		print(result)
-		testMap.request(refresh: false, key: "2") { (result) in
+		test.request(refresh: false) { (result) in
 			print(result)
-			MuxRepository.flushAll()
-			MuxRepository.clearAll()
 		}
 	}
+
+
+	testMap.request(refresh: false, key: "1") { (result) in
+		print(result)
+		testMap.request(refresh: false, key: "1") { (result) in
+			print(result)
+			testMap.request(refresh: false, key: "2") { (result) in
+				print(result)
+				MuxRepository.flushAll()
+				MuxRepository.clearAll()
+			}
+		}
+	}
+
+
+	//test.clear()
+	//testMap.clear()
 }
-
-
-//test.clear()
-//testMap.clear()
 
 
 
@@ -74,7 +78,7 @@ func z() {
 		}
 }
 
-// z()
+
 
 func d() {
 	print(Date())
@@ -101,8 +105,28 @@ func d() {
 	}
 }
 
+
+func testImageLoader() {
+	ImageLoader.main.request(url: URL(string: "https://i.imgur.com/QXYqnI9.jpg")!) { (result) in
+		print("Image 1")
+	}
+	ImageLoader.main.request(url: URL(string: "https://i.imgur.com/QXYqnI9.jpg")!) { (result) in
+		print("Image 2")
+		DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+			print("Trying image 3")
+			ImageLoader.main.request(url: URL(string: "https://i.imgur.com/QXYqnI9.jpg")!) { (result) in
+				print("Image 3")
+			}
+		}
+	}
+}
+
+
+// m()
+// z()
 // d()
 
+testImageLoader()
 
 
 RunLoop.main.run()
