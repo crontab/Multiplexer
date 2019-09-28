@@ -11,7 +11,7 @@ import Foundation
 
 class Zipper {
 	typealias OnResult<T> = (Result<T, Error>) -> Void
-	typealias OnFetch<T> = (_ onResult: @escaping OnResult<T>) -> Void
+	typealias OnFetch<T> = (@escaping OnResult<T>) -> Void
 
 	private var fetchers: [OnFetch<Any>] = []
 

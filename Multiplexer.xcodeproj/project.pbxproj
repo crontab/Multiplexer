@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		36043927233DEC050043FDB6 /* Cacher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36043926233DEC050043FDB6 /* Cacher.swift */; };
 		3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3608F76F233D585200B3A713 /* MultiplexerMap.swift */; };
+		3657A1D1233F46C600450AAE /* FileManagerEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3657A1D0233F46C600450AAE /* FileManagerEx.swift */; };
+		3657A1D3233F46E000450AAE /* ErrorEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3657A1D2233F46E000450AAE /* ErrorEx.swift */; };
 		36876793233CAA76004205DA /* Multiplexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36876792233CAA76004205DA /* Multiplexer.swift */; };
 		36D46FED233BF30E008E9AF9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D46FEC233BF30E008E9AF9 /* main.swift */; };
 		36E310B0233EB67600E4E049 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E310AF233EB67600E4E049 /* Zipper.swift */; };
@@ -30,6 +32,8 @@
 /* Begin PBXFileReference section */
 		36043926233DEC050043FDB6 /* Cacher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cacher.swift; sourceTree = "<group>"; };
 		3608F76F233D585200B3A713 /* MultiplexerMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiplexerMap.swift; sourceTree = "<group>"; };
+		3657A1D0233F46C600450AAE /* FileManagerEx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerEx.swift; sourceTree = "<group>"; };
+		3657A1D2233F46E000450AAE /* ErrorEx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorEx.swift; sourceTree = "<group>"; };
 		36876792233CAA76004205DA /* Multiplexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multiplexer.swift; sourceTree = "<group>"; };
 		36D46FE9233BF30E008E9AF9 /* Multiplexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Multiplexer; sourceTree = BUILT_PRODUCTS_DIR; };
 		36D46FEC233BF30E008E9AF9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -67,6 +71,8 @@
 		36D46FEB233BF30E008E9AF9 /* Multiplexer */ = {
 			isa = PBXGroup;
 			children = (
+				3657A1D0233F46C600450AAE /* FileManagerEx.swift */,
+				3657A1D2233F46E000450AAE /* ErrorEx.swift */,
 				36043926233DEC050043FDB6 /* Cacher.swift */,
 				36876792233CAA76004205DA /* Multiplexer.swift */,
 				3608F76F233D585200B3A713 /* MultiplexerMap.swift */,
@@ -141,6 +147,8 @@
 				36876793233CAA76004205DA /* Multiplexer.swift in Sources */,
 				3608F770233D585200B3A713 /* MultiplexerMap.swift in Sources */,
 				36E310B2233EB88B00E4E049 /* Debouncer.swift in Sources */,
+				3657A1D1233F46C600450AAE /* FileManagerEx.swift in Sources */,
+				3657A1D3233F46E000450AAE /* ErrorEx.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

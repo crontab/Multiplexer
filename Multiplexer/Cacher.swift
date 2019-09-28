@@ -9,8 +9,8 @@
 import Foundation
 
 
-internal let jsonDecoder: JSONDecoder = { JSONDecoder() }()
-internal let jsonEncoder: JSONEncoder = { JSONEncoder() }()
+private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
+private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 
 protocol Cacher {
@@ -29,24 +29,6 @@ final class NoCacher<T: Codable>: Cacher {
 	static func saveToCache<T: Codable>(_ result: T, key: K, domain: String?) { }
 	static func clearCache(key: K, domain: String?) { }
 	static func clearCacheMap(domain: String) { }
-}
-
-
-extension FileManager {
-
-	class func cacheDirectory(subDirectory: String, create: Bool) -> URL {
-		let result = `default`.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent(subDirectory)
-		if create && !`default`.fileExists(atPath: result.path) {
-			try! `default`.createDirectory(at: result, withIntermediateDirectories: true, attributes: nil)
-		}
-		return result
-	}
-
-	class func removeRecursively(_ url: URL?) {
-		if let url = url {
-			try? `default`.removeItem(at: url)
-		}
-	}
 }
 
 

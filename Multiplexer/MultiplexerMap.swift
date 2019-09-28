@@ -11,15 +11,15 @@ import Foundation
 
 class MultiplexerMapBase<T: Codable, C: Cacher> {
 	typealias K = String
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnKeyFetch = (K, @escaping Completion) -> Void
+	typealias OnResult = (Result<T, Error>) -> Void
+	typealias OnKeyFetch = (K, @escaping OnResult) -> Void
 
 	init(onKeyFetch: @escaping OnKeyFetch) {
 		self.onKeyFetch = onKeyFetch
 	}
 
 
-	internal func request(refresh: Bool, key: K, completion: @escaping Completion) {
+	internal func request(refresh: Bool, key: K, completion: @escaping OnResult) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:

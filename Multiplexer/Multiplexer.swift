@@ -12,21 +12,11 @@ import Foundation
 let STANDARD_TTL: TimeInterval = 30 * 60
 
 
-extension Error {
-	var isConnectivityError: Bool {
-		if (self as NSError).domain == NSURLErrorDomain {
-			return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((self as NSError).code)
-		}
-		return false
-	}
-}
-
-
 internal class MultiplexFetcher<T: Codable> {
-	typealias Completion = (Result<T, Error>) -> Void
-	typealias OnFetch = (@escaping Completion) -> Void
+	typealias OnResult = (Result<T, Error>) -> Void
+	typealias OnFetch = (@escaping OnResult) -> Void
 
-	internal var completions: [Completion] = []
+	internal var completions: [OnResult] = []
 	internal var completionTime: TimeInterval?
 	internal var previousValue: T?
 
@@ -37,7 +27,7 @@ internal class MultiplexFetcher<T: Codable> {
 		return Date().timeIntervalSinceReferenceDate <= completionTime + ttl
 	}
 
-	internal func append(completion: @escaping Completion) -> Bool {
+	internal func append(completion: @escaping OnResult) -> Bool {
 		completions.append(completion)
 		return completions.count > 1
 	}
@@ -61,7 +51,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T> {
 		self.onFetch = onFetch
 	}
 
-	func request(refresh: Bool, completion: @escaping Completion) {
+	func request(refresh: Bool, completion: @escaping OnResult) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
 		if !refresh && resultAvailable(ttl: Self.timeToLive), let previousValue = previousValue {
