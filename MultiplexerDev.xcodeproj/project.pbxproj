@@ -40,7 +40,7 @@
 		3657A1D2233F46E000450AAE /* ErrorEx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorEx.swift; sourceTree = "<group>"; };
 		3657A1D4233F4A5C00450AAE /* MuxRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuxRepository.swift; sourceTree = "<group>"; };
 		36876792233CAA76004205DA /* Multiplexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multiplexer.swift; sourceTree = "<group>"; };
-		36D46FE9233BF30E008E9AF9 /* Multiplexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Multiplexer; sourceTree = BUILT_PRODUCTS_DIR; };
+		36D46FE9233BF30E008E9AF9 /* MultiplexerDev */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MultiplexerDev; sourceTree = BUILT_PRODUCTS_DIR; };
 		36D46FEC233BF30E008E9AF9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		36E310AF233EB67600E4E049 /* Zipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zipper.swift; sourceTree = "<group>"; };
 		36E310B1233EB88B00E4E049 /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
@@ -74,7 +74,7 @@
 		36D46FEA233BF30E008E9AF9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				36D46FE9233BF30E008E9AF9 /* Multiplexer */,
+				36D46FE9233BF30E008E9AF9 /* MultiplexerDev */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,9 +102,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		36D46FE8233BF30E008E9AF9 /* Multiplexer */ = {
+		36D46FE8233BF30E008E9AF9 /* MultiplexerDev */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 36D46FF0233BF30E008E9AF9 /* Build configuration list for PBXNativeTarget "Multiplexer" */;
+			buildConfigurationList = 36D46FF0233BF30E008E9AF9 /* Build configuration list for PBXNativeTarget "MultiplexerDev" */;
 			buildPhases = (
 				36D46FE5233BF30E008E9AF9 /* Sources */,
 				36D46FE6233BF30E008E9AF9 /* Frameworks */,
@@ -114,9 +114,9 @@
 			);
 			dependencies = (
 			);
-			name = Multiplexer;
+			name = MultiplexerDev;
 			productName = Multiplexer;
-			productReference = 36D46FE9233BF30E008E9AF9 /* Multiplexer */;
+			productReference = 36D46FE9233BF30E008E9AF9 /* MultiplexerDev */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -134,7 +134,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 36D46FE4233BF30E008E9AF9 /* Build configuration list for PBXProject "Multiplexer" */;
+			buildConfigurationList = 36D46FE4233BF30E008E9AF9 /* Build configuration list for PBXProject "MultiplexerDev" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -147,7 +147,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				36D46FE8233BF30E008E9AF9 /* Multiplexer */,
+				36D46FE8233BF30E008E9AF9 /* MultiplexerDev */,
 			);
 		};
 /* End PBXProject section */
@@ -315,7 +315,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		36D46FE4233BF30E008E9AF9 /* Build configuration list for PBXProject "Multiplexer" */ = {
+		36D46FE4233BF30E008E9AF9 /* Build configuration list for PBXProject "MultiplexerDev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				36D46FEE233BF30E008E9AF9 /* Debug */,
@@ -324,7 +324,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		36D46FF0233BF30E008E9AF9 /* Build configuration list for PBXNativeTarget "Multiplexer" */ = {
+		36D46FF0233BF30E008E9AF9 /* Build configuration list for PBXNativeTarget "MultiplexerDev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				36D46FF1233BF30E008E9AF9 /* Debug */,
