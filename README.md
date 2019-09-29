@@ -1,5 +1,5 @@
 
-# Multiplexer Utilities - *Work in progress*
+# Multiplexer Utilities
 ### Async utilities with caching for Swift
 
 #### Table of contents
@@ -12,9 +12,8 @@
 - [Zipper](#zipper)
 - [Debouncer and DebouncerVar](#debouncer)
 - [Packages (None at the moment)](#packages)
+- [Building and linking](#building)
 - [Authors](#authors)
-
-*This source code is free to use and modify; "free" as in "free as a bird". You are welcome to use, fork, modify at your own discretion. The author hopes this source code can be useful and he would be grateful if you kept his name in the source files.*
 
 <a name="intro"></a>
 ## 1. Introduction
@@ -296,7 +295,16 @@ None at the moment. I think git submodules are still the best way to integrate 3
 
 The Swift Package Manager, however, is a possibility that will be considered at one point.
 
+<a name="building"></a>
+## Building and linking
+
+Clone the repository into your project as a submodule, or otherwise, if you want to run the demo app, clone a separate normal copy. The repository contains an XCode project `Multiplexer.xcodeproj` that compiles into an iOS framework, as well as `MultiplexerDemo.xcodeproj`, which is a simple iOS demo app that shows weather in arbitrary locations (based on an Open API provided by MetaWeather.com).
+
+The Multiplexer framework doesn't have any 3rd party dependencies.
+
+Enjoy your coding!
+
 <a name="intro"></a>
 ## Authors
 
-MuxUtils is developed by Hovik Melikyan.
+MuxUtils is developed by [Hovik Melikyan](https://github.com/crontab).
