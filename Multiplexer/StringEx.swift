@@ -9,7 +9,7 @@
 import Foundation
 
 
-extension String {
+public extension String {
 
 	func toURLSafeHash(max: Int) -> String {
 		return String(toSHA256().toURLSafeBase64().suffix(max))
@@ -18,10 +18,14 @@ extension String {
 	func toSHA256() -> Data {
 		return (data(using: .utf8) ?? Data()).toSHA256()
 	}
+
+	func toUrlEncoded() -> String {
+		return addingPercentEncoding(withAllowedCharacters:CharacterSet.urlAllowed) ?? ""
+	}
 }
 
 
-extension Data {
+public extension Data {
 
 	func toHexString() -> String {
 		return map { String(format: "%.2hhx", $0) }.joined()
@@ -38,4 +42,14 @@ extension Data {
 		}
 		return Data(hash)
 	}
+}
+
+
+public extension CharacterSet {
+
+	static let urlAllowed: CharacterSet = {
+		var result = urlQueryAllowed
+		result.remove(charactersIn: "&+")
+		return result
+	}()
 }

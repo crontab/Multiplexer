@@ -14,20 +14,24 @@ import Foundation
 /// Zipper does not require its instance to be retained explicitly, i.e. you can chain the Zipper constructor with any number of `add()` methods and the final `sync()` in one Swift statement.
 /// See README.md for more information and examples.
 ///
-class Zipper {
-	typealias OnResult<T> = (Result<T, Error>) -> Void
-	typealias OnFetch<T> = (@escaping OnResult<T>) -> Void
+public class Zipper {
+	public typealias OnResult<T> = (Result<T, Error>) -> Void
+	public typealias OnFetch<T> = (@escaping OnResult<T>) -> Void
 
 	private var fetchers: [OnFetch<Any>] = []
 
+	public init() { }
+
 	/// Add an execution block that returns a `Result<Any, Error>`
-	func add(_ onFetch: @escaping OnFetch<Any>) -> Self {
+	@discardableResult
+	public func add(_ onFetch: @escaping OnFetch<Any>) -> Self {
 		fetchers.append(onFetch)
 		return self
 	}
 
 	/// Add an execution block that returns a `Result<T, Error>`, where generic type T is inferred from the `type` argument. This is useful when the result type can not be inferred automatically from the block definition.
-	func add<T>(type: T.Type, _ onFetch: @escaping OnFetch<T>) -> Self {
+	@discardableResult
+	public func add<T>(type: T.Type, _ onFetch: @escaping OnFetch<T>) -> Self {
 		return add { (onAnyResult) in
 			onFetch { (result) in
 				switch result {
@@ -41,21 +45,24 @@ class Zipper {
 	}
 
 	/// Add a multiplexer object to the zipper. This multiplexer's `request(completion:)` will be called as part of the zipper chain.
-	func add<T: Codable>(_ multiplexer: Multiplexer<T>) -> Self {
+	@discardableResult
+	public func add<T: Codable>(_ multiplexer: Multiplexer<T>) -> Self {
 		return add(type: T.self) { (onResult) in
 			multiplexer.request(completion: onResult)
 		}
 	}
 
 	/// Add a multiplexer map object to the zipper. This multiplexer's `request(key:completion:)` will be called as part of the zipper chain.
-	func add<T: Codable>(key: String, _ multiplexer: MultiplexerMap<T>) -> Self {
+	@discardableResult
+	public func add<T: Codable>(key: String, _ multiplexer: MultiplexerMap<T>) -> Self {
 		return add(type: T.self) { (onResult) in
 			multiplexer.request(key: key, completion: onResult)
 		}
 	}
 
 	/// Add a media loader (ImageLoader or MediaLoader) to the zipper. This loader's `request(url:completion:)` will be called as part of the zipper chain.
-	func add<T: AnyObject>(url: URL, _ mediaLoader: CachingLoaderBase<T>) -> Self {
+	@discardableResult
+	public func add<T: AnyObject>(url: URL, _ mediaLoader: CachingLoaderBase<T>) -> Self {
 		return add(type: T.self) { (onResult) in
 			mediaLoader.request(url: url, completion: onResult)
 		}
@@ -63,7 +70,7 @@ class Zipper {
 
 	/// Execute all the blocks added so far and wait for the results. The results will be delivered at once into the `completion` block in the form of an array of `Result<Any, Error>`, where the order of objects is the same as the order of the `add()` method calls. This is not type safe, which means you will have to typecast each result accordingly.
 	/// Because Zipper stores all the multiplexer objects and blocks, it is possible to reuse the same instance with multiple calls to `sync()` though you should be careful with cyclic references in your blocks. It is probably best to chain a call to the Zipper constructor, then `add(...)` and `sync(...)` in one statement without retaining the Zipper instance.
-	func sync(completion: @escaping (_ results: [Result<Any, Error>]) -> Void) {
+	public func sync(completion: @escaping (_ results: [Result<Any, Error>]) -> Void) {
 		guard !fetchers.isEmpty else {
 			completion([])
 			return

@@ -14,15 +14,15 @@ import Foundation
 /// See README.md for a more detailed discussion.
 ///
 
-typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
+public typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
 
 
 let STANDARD_TTL: TimeInterval = 30 * 60
 
 
 /// Internal class that's reused in `MultiplexerBase` and `MultiplexerMapBase`
-internal class MultiplexFetcher<T: Codable> {
-	typealias OnResult = (Result<T, Error>) -> Void
+public class MultiplexFetcher<T: Codable> {
+	public typealias OnResult = (Result<T, Error>) -> Void
 
 	internal var completions: [OnResult] = []
 	internal var completionTime: TimeInterval = 0
@@ -45,7 +45,7 @@ internal class MultiplexFetcher<T: Codable> {
 	}
 
 	@discardableResult
-	func clearMemory() -> Self {
+	public func clearMemory() -> Self {
 		completionTime = 0
 		previousValue = nil
 		return self
@@ -54,7 +54,7 @@ internal class MultiplexFetcher<T: Codable> {
 
 
 /// Multiplexer base class that can be combined with a static `Cacher` implementation in a typealias.
-class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepositoryProtocol {
+public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 
 	///
 	/// Instantiates a `Multiplexer<T>` object with a given `onFetch` block. It's important to ensure that for each given singular object there is only one Multiplexer singleton in the app.
@@ -70,7 +70,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	func request(completion: @escaping OnResult) {
+	public func request(completion: @escaping OnResult) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
 		if !refreshFlag, let previousValue = previousValue, !isExpired(ttl: Self.timeToLive) {
@@ -111,7 +111,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 
 	/// "Soft" refresh: the next call to `request(completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh()` does not have an immediate effect on any ongoing asynchronous requests.
 	@discardableResult
-	func refresh() -> Self {
+	public func refresh() -> Self {
 		refreshFlag = true
 		return self
 	}
@@ -119,7 +119,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 
 	/// Discards the memory and disk caches for the given object
 	@discardableResult
-	func clear() -> Self {
+	public func clear() -> Self {
 		C.clearCache(key: Self.cacheKey, domain: nil)
 		return clearMemory()
 	}
@@ -127,7 +127,7 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 
 	/// Writes the previously cached object to disk using the default cacher interface. For the `Multiplexer` class the default cacher is `JSONDiskCacher`.
 	@discardableResult
-	func flush() -> Self {
+	public func flush() -> Self {
 		if let previousValue = previousValue {
 			C.saveToCache(previousValue, key: Self.cacheKey, domain: nil)
 		}
@@ -136,15 +136,15 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 
 
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onFetch`. The time-to-live parameter will be ignored if this method returns `true`.
-	class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+	public class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
 
 	/// Determines when the Multiplexer should attempt to fetch a fresh copy of the object again. Applies to the memory cache only. Defaults to 30 minutes.
-	class var timeToLive: TimeInterval { STANDARD_TTL }
+	public class var timeToLive: TimeInterval { STANDARD_TTL }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.
-	class var cacheKey: String { String(describing: T.self) }
+	public class var cacheKey: String { String(describing: T.self) }
 
 
 	private let onFetch: (@escaping OnResult) -> Void

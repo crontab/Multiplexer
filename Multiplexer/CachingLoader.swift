@@ -24,13 +24,13 @@ import Foundation
 #if !NO_UIKIT
 
 /// Asynchronous caching downloader for images. Call `request(url:completion:)` to retrieve the image object or load the cached one. Use the `ImageLoader.main` singleton in your app.
-class ImageLoader: CachingLoaderBase<UIImage> {
+public class ImageLoader: CachingLoaderBase<UIImage> {
 
 	static let main = { ImageLoader() }()
 
-	override class var cacheFolderName: String { "Images" }
+	public override class var cacheFolderName: String { "Images" }
 
-	override func prepareMemoryObject(cacheFileURL: URL) -> UIImage? {
+	public override func prepareMemoryObject(cacheFileURL: URL) -> UIImage? {
 		return UIImage(contentsOfFile: cacheFileURL.path)
 	}
 }
@@ -39,7 +39,7 @@ class ImageLoader: CachingLoaderBase<UIImage> {
 
 
 /// Used as a generic type for `CachingVideoLoader<>`. Wraps the URL because CachingLoader<> requires the generic to be a class (and that's because of the NSCache interface)
-class FileURL {
+public class FileURL {
 	let fileURL: URL
 
 	init(fileURL: URL) {
@@ -49,20 +49,20 @@ class FileURL {
 
 
 /// Asynchronous caching downloader for video, audio or other large media files. Call `request(url:completion:)` or `request(url:progress:completion:)` to retrieve the local file path of the cached object. The result has a type `FileURL` for internal reasons (see comments for FileURL). The media objects themselves are not cached in memory as it is assumed that they will always be streamed from disk. Use the `MediaLoader.main` singleton in your app.
-class MediaLoader: CachingLoaderBase<FileURL> {
+public class MediaLoader: CachingLoaderBase<FileURL> {
 
 	static let main = { MediaLoader() }()
 
-	override class var cacheFolderName: String { "Videos" }
+	public override class var cacheFolderName: String { "Videos" }
 
-	override func prepareMemoryObject(cacheFileURL: URL) -> FileURL? {
+	public override func prepareMemoryObject(cacheFileURL: URL) -> FileURL? {
 		return FileURL(fileURL: cacheFileURL)
 	}
 }
 
 
 /// Protocol that defines what should be overridden in subclasses.
-protocol CachingLoaderProtocol {
+public protocol CachingLoaderProtocol {
 	associatedtype T: AnyObject
 
 	/// Internal; the last component of the cache path that will be appended to "<cache-folder>/Mux/Files"
@@ -73,16 +73,16 @@ protocol CachingLoaderProtocol {
 }
 
 
-let DEFAULT_MEM_CACHE_CAPACITY = 50
+public let DEFAULT_MEM_CACHE_CAPACITY = 50
 let CACHING_LOADER_ERROR_DOMAIN = "MuxCachingLoaderError"
 
 
 /// Internal class that should be subclassed with CachingLoaderProtocol methods overridden.
-class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProtocol {
-	typealias OnResult = (Result<T, Error>) -> Void
+public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProtocol {
+	public typealias OnResult = (Result<T, Error>) -> Void
 
 	/// Instantiates a CachingLoader object with the memory capacity parameter. Internal.
-	init(memoryCacheCapacity: Int = DEFAULT_MEM_CACHE_CAPACITY) {
+	public init(memoryCacheCapacity: Int = DEFAULT_MEM_CACHE_CAPACITY) {
 		memCache = CachingDictionary(capacity: memoryCacheCapacity)
 	}
 
@@ -94,7 +94,7 @@ class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProto
 	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`
 	///
 
-	func request(url: URL, progress: ((Int64, Int64) -> Void)?, completion: @escaping OnResult) {
+	public func request(url: URL, progress: ((Int64, Int64) -> Void)?, completion: @escaping OnResult) {
 		// Available in the cache? Return immediately:
 		if let object = memCache[url.absoluteString as NSString] {
 			completion(.success(object))
@@ -118,20 +118,20 @@ class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProto
 	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`
 	///
 
-	func request(url: URL, completion: @escaping OnResult) {
+	public func request(url: URL, completion: @escaping OnResult) {
 		request(url: url, progress: nil, completion: completion)
 	}
 
 
 	/// Can be called to check whether a given object is available locally or it will be downloaded on next call to `request(...)`
-	func willRefresh(url: URL) -> Bool {
+	public func willRefresh(url: URL) -> Bool {
 		return memCache[url.absoluteString as NSString] == nil || !FileManager.exists(cacheFileURLFor(url: url, create: false))
 	}
 
 
 	/// Discard the objects stored in the memory cache
 	@discardableResult
-	func clearMemory() -> Self {
+	public func clearMemory() -> Self {
 		memCache.clear()
 		return self
 	}
@@ -139,7 +139,7 @@ class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProto
 
 	/// Discard the disk cache for this class of objects (i.e. images in case of the ImageLoader)
 	@discardableResult
-	func clearCache() -> Self {
+	public func clearCache() -> Self {
 		// NOTE: clearCache() should never be called from within a completion handler (I don't remember why, but believe me it's bad)
 		FileManager.removeRecursively(cacheSubdirectory(create: false))
 		return self
@@ -148,24 +148,24 @@ class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProto
 
 	/// Clear both memory and disk caches
 	@discardableResult
-	func clear() -> Self {
+	public func clear() -> Self {
 		clearCache()
 		return clearMemory()
 	}
 
 
 	@discardableResult
-	func flush() -> Self {
+	public func flush() -> Self {
 		return self
 	}
 
 
-	class var cacheFolderName: String {
+	public class var cacheFolderName: String {
 		preconditionFailure()
 	}
 
 
-	func prepareMemoryObject(cacheFileURL: URL) -> T? {
+	public func prepareMemoryObject(cacheFileURL: URL) -> T? {
 		preconditionFailure()
 	}
 

@@ -9,7 +9,7 @@
 import Foundation
 
 
-class FileDownloader: NSObject, URLSessionDownloadDelegate {
+public class FileDownloader: NSObject, URLSessionDownloadDelegate {
 
 	typealias Progress = (Int64, Int64) -> Void
 	typealias Completion = (Result<URL, Error>) -> Void
@@ -35,13 +35,13 @@ class FileDownloader: NSObject, URLSessionDownloadDelegate {
 		task.cancel()
 	}
 
-	func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+	public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
 		if let progress = progress {
 			progress(totalBytesWritten, totalBytesExpectedToWrite)
 		}
 	}
 
-	func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
 		// `error` can be nil after a successful download; we don't need this event
 		if let error = error {
 			completion(.failure(error))
@@ -49,7 +49,7 @@ class FileDownloader: NSObject, URLSessionDownloadDelegate {
 		session.finishTasksAndInvalidate()
 	}
 
-	func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+	public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
 		completion(.success(location))
 		session.finishTasksAndInvalidate()
 	}
