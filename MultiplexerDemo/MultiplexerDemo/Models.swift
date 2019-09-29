@@ -20,8 +20,10 @@ class Source: Codable {
 class Location: Codable {
 	var woeid: Int			// Where on Earth ID
 	var title: String		// "London"
-	var timezone: String	// "Europe/London"
+	var timezone: String?	// "Europe/London"
 	var lattLong: String	// "51.506321,-0.12714"
+
+	var idAsString: String { String(woeid) }
 }
 
 
@@ -43,12 +45,12 @@ class WeatherBlock: Codable {
 }
 
 
-class LocationInfo: Codable {
+class FullLocation: Codable {
 	var consolidatedWeather: [WeatherBlock]
 	var sources: [Source]
 	var woeid: Int			// Where on Earth ID
 	var title: String		// "London"
-	var timezone: String	// "Europe/London"
+	var timezone: String?	// "Europe/London"
 	var lattLong: String	// "51.506321,-0.12714"
 
 	var idAsString: String { String(woeid) }

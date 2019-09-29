@@ -18,7 +18,7 @@ class CityCell: UITableViewCell {
 	@IBOutlet weak var tempLabel: UILabel!
 	@IBOutlet weak var detailLabel: UILabel!
 
-	func set(locationInfo: LocationInfo) {
+	func set(locationInfo: FullLocation) {
 		titleLabel.text = locationInfo.title
 		if let weather = locationInfo.consolidatedWeather.first {
 			tempLabel.text = "\(Int(weather.theTemp))º"
@@ -32,15 +32,22 @@ class CityCell: UITableViewCell {
 }
 
 
+
 class CitiesViewController: UITableViewController {
 
-	private var locations: [LocationInfo] = []
+	// Cache weather information per location for 30 minutes. This can be helpful when e.g. re-adding a previously removed city. Pull-to-refresh though causes a refresh of data anyway.
+	static var fullLocationMux = MultiplexerMap<FullLocation> { (id, onResult) in
+		Backend.fetchWeather(locationId: id, completion: onResult)
+	}
 
-	private var locationIDs: [String] { locations.map { $0.idAsString } }
+
+	private var locations: [FullLocation] = []
 
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
+
+		tableView.tableFooterView = UIView(frame: .zero)
 
 		tableView.refreshControl = UIRefreshControl()
 		tableView.sendSubviewToBack(tableView.refreshControl!)
@@ -51,7 +58,7 @@ class CitiesViewController: UITableViewController {
 
 
 	@objc func didPullToRefresh() {
-		refreshLocations(force: true, locationIDs: locationIDs)
+		refreshLocations(force: true, locationIDs: locations.map { $0.idAsString })
 	}
 
 
@@ -60,18 +67,42 @@ class CitiesViewController: UITableViewController {
 			return
 		}
 		isRefreshing = true
+
+		// Create a zipper chain with the locationIDs. The zipper will request full location information for each ID in parallel.
 		let zipper = Zipper()
-		initialLocationIDs.forEach {
+
+		locationIDs.forEach {
 			if force {
-				Mux.weather.refresh(key: $0)
+				Self.fullLocationMux.refresh(key: $0)
 			}
-			zipper.add(key: $0, Mux.weather)
+			zipper.add(key: $0, Self.fullLocationMux)
 		}
+
 		zipper.sync { (results) in
+			var lastError: Error?
+
+			// Get the results or otherwise store the last error object to be shown as an alert
 			self.locations = results.compactMap({
-				try? $0.get() as? LocationInfo
+				switch $0 {
+				case .failure(let error):
+					lastError = error
+					return nil
+				case .success(let any):
+					return any as? FullLocation
+				}
 			})
-			self.tableView.reloadData()
+
+			if let error = lastError {
+				self.alert(error)
+			}
+			else {
+				// Make sure the order is correct (it should be, unless there is a bug in the Multiplexer framework)
+				for i in locationIDs.indices {
+					precondition(self.locations[i].idAsString == locationIDs[i])
+				}
+				self.tableView.reloadData()
+			}
+
 			self.isRefreshing = false
 		}
 	}
@@ -89,6 +120,27 @@ class CitiesViewController: UITableViewController {
 	}
 
 
+	@IBSegueAction func addCityAction(_ coder: NSCoder) -> AddCityViewController? {
+		let addCity = AddCityViewController(coder: coder)
+		addCity?.onLocationSelected = { [weak self] (location) in
+			guard let self = self else { return }
+			self.locations.removeAll { $0.idAsString == location.idAsString }
+			self.isRefreshing = true
+			Self.fullLocationMux.request(key: location.idAsString) { (result) in
+				self.isRefreshing = false
+				switch result {
+				case .failure(let error):
+					self.alert(error)
+				case .success(let fullLocation):
+					self.locations.insert(fullLocation, at: 0)
+					self.tableView.reloadData()
+				}
+			}
+		}
+		return addCity
+	}
+
+
 	// MARK: - Table view data source
 
 	override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -99,5 +151,12 @@ class CitiesViewController: UITableViewController {
 		let cell = tableView.dequeueReusableCell(withIdentifier: "CityCell", for: indexPath) as! CityCell
 		cell.set(locationInfo: locations[indexPath.row])
 		return cell
+	}
+
+	override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+		if editingStyle == .delete {
+			locations.remove(at: indexPath.row)
+			tableView.deleteRows(at: [indexPath], with: .fade)
+		}
 	}
 }

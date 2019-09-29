@@ -15,7 +15,7 @@ class Request {
 
 
 	init(path: String) {
-		urlRequest = .init(url: URL(string: "https://www.metaweather.com/api")!.appendingPathComponent(path))
+		urlRequest = .init(url: URL(string: "https://www.metaweather.com/api" + path)!)
 		#if PRINT_REQUEST_URL
 			print(urlRequest.httpMethod ?? "GET", urlRequest.url!)
 		#endif
