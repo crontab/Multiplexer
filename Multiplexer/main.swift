@@ -117,6 +117,25 @@ func d() {
 }
 
 
+class DebouncerContainer {
+	var result: Result<Obj, Error>?
+	var debouncer: Debouncer!
+
+	func initialize() {
+		self.debouncer = Debouncer(delay: 1) {
+			test.request { [weak self] (result) in
+				guard let self = self else { return }
+				self.result = result
+			}
+		}
+	}
+}
+
+
+func testDebouncer() {
+}
+
+
 func testImageLoader() {
 	ImageLoader.main.request(url: URL(string: "https://i.imgur.com/QXYqnI9.jpg")!) { (result) in
 		print("Image 1")

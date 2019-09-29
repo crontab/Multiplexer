@@ -10,6 +10,7 @@
 - [Media downloaders](#media-downloaders)
 - [MuxRepository](#mux-repository)
 - [Zipper](#zipper)
+- [Debouncer and DebouncerVar](#debouncer)
 - [Authors](#authors)
 
 <a name="intro"></a>
@@ -243,7 +244,47 @@ Zipper()
 
 Notice how it is not necessary to retain the Zipper object. In fact in the example above it will be released after the execution of the statement despite that the `sync(completion:)` completion block may be called way later. Alternatively, you can reuse a Zipper instance for repeated calls to `sync(completion:)`, since it retains all the blocks and multiplexers added with the `add()` family methods. Beware of cyclic references that this scenario may introduce though.
 
-More information on the interface and methods can be found in the source file [MuxRepository.swift](Zipper/Zipper.swift).
+More information on the interface and methods can be found in the source file [MuxRepository.swift](Multiplexer/Zipper.swift).
+
+<a name="debouncer"></a>
+## Debouncer and DebouncerVar
+
+`Debouncer` triggers execution of a block after a specified delay, but in addition it can postpone the execution every time `touch()` is called. This can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field.
+
+A Debouncer instance should be retained in your GUI object to be useful, therefore beware of cyclic references that your execution block can introduce. The `touch()` method should be called at least once for the block to be executed.
+
+For example, you ask the user to choose a username in your app and you want to display whether the username is available or not, as the user types in the input field. You want to make fewer network requests as the user types. Somewhere in your view controller class you can have:
+
+```swift
+class UsernameViewController: UIViewController {
+	var usernameField: UITextField!
+	var usernameTakenView: UIView!
+	var usernameDebouncer: Debouncer!
+
+	override func viewDidLoad() {
+		super.viewDidLoad()
+
+		usernameDebouncer = Debouncer(delay: 1) { [weak self] in
+			guard let self = self else { return }
+			Backend.checkUsernameAvailability(username: self.usernameField.text) { result in
+				self.usernameTakenView.isHidden = result
+			}
+		}
+
+		usernameField.addTarget(self, action: #selector(usernameDidChange(_:)), for: .editingChanged)
+	}
+
+	@objc func usernameDidChange(_ unused: UITextField) {
+		usernameDebouncer.touch()
+	}
+	
+	// ...
+}
+```
+
+A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is updated, and if the value is different from the previous one.
+
+More information on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/Debouncer.swift).
 
 <a name="intro"></a>
 ## Authors
