@@ -21,6 +21,7 @@
 		36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDFF2340CB0100E34B07 /* Zipper.swift */; };
 		36E8FE0C2340CB0100E34B07 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE002340CB0100E34B07 /* Debouncer.swift */; };
 		36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE012340CB0100E34B07 /* FileDownloader.swift */; };
+		36E8FE0F2340D32500E34B07 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 36E8FE0E2340D32500E34B07 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		36E8FDFF2340CB0100E34B07 /* Zipper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Zipper.swift; sourceTree = "<group>"; };
 		36E8FE002340CB0100E34B07 /* Debouncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
 		36E8FE012340CB0100E34B07 /* FileDownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
+		36E8FE0E2340D32500E34B07 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 		36E8FDD22340CA0500E34B07 = {
 			isa = PBXGroup;
 			children = (
+				36E8FE0E2340D32500E34B07 /* README.md */,
 				36E8FDDE2340CA0500E34B07 /* Multiplexer */,
 				36E8FDE92340CA0500E34B07 /* MultiplexerTests */,
 				36E8FDDD2340CA0500E34B07 /* Products */,
@@ -212,6 +215,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36E8FE0F2340D32500E34B07 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

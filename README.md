@@ -146,7 +146,7 @@ userProfiles.request(key: "user_8cJOiRXbugFccrUhmCX2") { result in
 	case .failure(let error)
 		print("Error:", error)
 	case .success(let profile)
-		print("My profile:", profile)
+		print("Someone else's profile:", profile)
 	}
 }
 ```
@@ -247,7 +247,7 @@ Zipper()
 
 Notice how it is not necessary to retain the Zipper object. In fact in the example above it will be released after the execution of the statement despite that the `sync(completion:)` completion block may be called way later. Alternatively, you can reuse a Zipper instance for repeated calls to `sync(completion:)`, since it retains all the blocks and multiplexers added with the `add()` family methods. Beware of cyclic references that this scenario may introduce though.
 
-More information on the interface and methods can be found in the source file [MuxRepository.swift](Multiplexer/Zipper.swift).
+More information on the interface and methods can be found in the source file [Zipper.swift](Multiplexer/Zipper.swift).
 
 <a name="debouncer"></a>
 ## Debouncer and DebouncerVar
@@ -287,7 +287,7 @@ class UsernameViewController: UIViewController {
 
 A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is assigned, and if the new value is different from the previous one.
 
-More information on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/Debouncer.swift).
+More information on each interface and their methods can be found in the source file [Debouncer.swift](Multiplexer/Debouncer.swift).
 
 <a name="packages"><a>
 ## Packages
