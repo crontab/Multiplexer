@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		363AD5E32340EE5F003063BC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363AD5E22340EE5F003063BC /* AppDelegate.swift */; };
-		363AD5E72340EE5F003063BC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363AD5E62340EE5F003063BC /* ViewController.swift */; };
 		363AD5EA2340EE5F003063BC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 363AD5E82340EE5F003063BC /* Main.storyboard */; };
 		363AD5EC2340EE5F003063BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 363AD5EB2340EE5F003063BC /* Assets.xcassets */; };
 		363AD5EF2340EE5F003063BC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 363AD5ED2340EE5F003063BC /* LaunchScreen.storyboard */; };
 		363AD5F82340F7EA003063BC /* Multiplexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 363AD5F72340F7EA003063BC /* Multiplexer.framework */; };
 		363AD5F92340F7EA003063BC /* Multiplexer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 363AD5F72340F7EA003063BC /* Multiplexer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		363AD5FC2340FAE8003063BC /* Backend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363AD5FB2340FAE8003063BC /* Backend.swift */; };
+		363AD5FE2340FCD3003063BC /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363AD5FD2340FCD3003063BC /* Models.swift */; };
+		363AD600234108F2003063BC /* CitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363AD5FF234108F2003063BC /* CitiesViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,12 +35,14 @@
 /* Begin PBXFileReference section */
 		363AD5DF2340EE5F003063BC /* Mux Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mux Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		363AD5E22340EE5F003063BC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		363AD5E62340EE5F003063BC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		363AD5E92340EE5F003063BC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		363AD5EB2340EE5F003063BC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		363AD5EE2340EE5F003063BC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		363AD5F02340EE5F003063BC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		363AD5F72340F7EA003063BC /* Multiplexer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Multiplexer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		363AD5FB2340FAE8003063BC /* Backend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backend.swift; sourceTree = "<group>"; };
+		363AD5FD2340FCD3003063BC /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		363AD5FF234108F2003063BC /* CitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitiesViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,8 +77,10 @@
 		363AD5E12340EE5F003063BC /* MultiplexerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				363AD5FD2340FCD3003063BC /* Models.swift */,
+				363AD5FB2340FAE8003063BC /* Backend.swift */,
+				363AD5FF234108F2003063BC /* CitiesViewController.swift */,
 				363AD5E22340EE5F003063BC /* AppDelegate.swift */,
-				363AD5E62340EE5F003063BC /* ViewController.swift */,
 				363AD5E82340EE5F003063BC /* Main.storyboard */,
 				363AD5EB2340EE5F003063BC /* Assets.xcassets */,
 				363AD5ED2340EE5F003063BC /* LaunchScreen.storyboard */,
@@ -163,8 +169,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				363AD5E72340EE5F003063BC /* ViewController.swift in Sources */,
+				363AD600234108F2003063BC /* CitiesViewController.swift in Sources */,
 				363AD5E32340EE5F003063BC /* AppDelegate.swift in Sources */,
+				363AD5FC2340FAE8003063BC /* Backend.swift in Sources */,
+				363AD5FE2340FCD3003063BC /* Models.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,7 +253,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG PRINT_REQUEST_URL PRINT_JSON";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
