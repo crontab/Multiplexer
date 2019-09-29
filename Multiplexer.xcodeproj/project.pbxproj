@@ -84,11 +84,11 @@
 			children = (
 				36876792233CAA76004205DA /* Multiplexer.swift */,
 				3608F76F233D585200B3A713 /* MultiplexerMap.swift */,
-				36E8FDA8233FA99300E34B07 /* FileDownloader.swift */,
 				36E8FDA7233FA99200E34B07 /* CachingLoader.swift */,
 				3657A1D4233F4A5C00450AAE /* MuxRepository.swift */,
 				36E310AF233EB67600E4E049 /* Zipper.swift */,
 				36E310B1233EB88B00E4E049 /* Debouncer.swift */,
+				36E8FDA8233FA99300E34B07 /* FileDownloader.swift */,
 				3657A1D0233F46C600450AAE /* FileManagerEx.swift */,
 				3657A1D2233F46E000450AAE /* ErrorEx.swift */,
 				36E8FDAB233FAA0E00E34B07 /* StringEx.swift */,

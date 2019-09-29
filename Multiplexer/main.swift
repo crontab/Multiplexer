@@ -72,16 +72,19 @@ func testMultiplexers() {
 
 
 
-func z() {
+func testZipper() {
 	Zipper()
 		.add({ (completion) in
 			asyncAfter(3) {
 				completion(.success("Hello"))
 			}
 		})
-		.add(multiplexer: test)
-		.add(key: "1", multiplexer: testMap)
+		.add(test)
+		.add(key: "1", testMap)
 		.sync { (results) in
+			precondition(try! results[0].get() is String)
+			precondition(try! results[1].get() is Obj)
+			precondition(try! results[2].get() is Obj)
 			results.forEach { print($0) }
 		}
 }
@@ -130,8 +133,8 @@ func testImageLoader() {
 }
 
 
-testMultiplexers()
-// z()
+// testMultiplexers()
+testZipper()
 // d()
 // testImageLoader()
 

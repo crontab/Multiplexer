@@ -9,6 +9,7 @@
 - [MultiplexerMap](#multiplexer-map)
 - [Media downloaders](#media-downloaders)
 - [MuxRepository](#mux-repository)
+- [Zipper](#zipper)
 - [Authors](#authors)
 
 <a name="intro"></a>
@@ -106,9 +107,9 @@ See also:
 - `refresh()`
 - `clear()`
 - `flush()`
-- `MultiplexerMap`
-- `MuxRepository`
-- `Zipper`
+- [`MultiplexerMap`](#multiplexer-map)
+- [`MuxRepository`](#mux-repository)
+- [`Zipper`](#zipper)
 
 More detailed descriptions on each method can be found in the source file [Multiplexer.swift](Multiplexer/Multiplexer.swift).
 
@@ -158,9 +159,9 @@ See also:
 - `clear(key:)`
 - `clear()`
 - `flush()`
-- `Multiplexer`
-- `MuxRepository`
-- `Zipper`
+- [`Multiplexer`](#multiplexer)
+- [`MuxRepository`](#mux-repository)
+- [`Zipper`](#zipper)
 
 More detailed descriptions on each method can be found in the source file [MultiplexerMap.swift](Multiplexer/MultiplexerMap.swift).
 
@@ -216,6 +217,34 @@ Registration example:
 let myProfile = Multiplexer<UserProfile>(onFetch: Backend.fetchMyProfile).register()
 ```
 
+More information on the interface and methods can be found in the source file [MuxRepository.swift](Multiplexer/MuxRepository.swift).
+
+<a name="zipper"></a>
+## Zipper
+
+`Zipper` allows to combine two or more parallel asynchronous requests into one and receive the results from all of them at once, when they become available. Zipper supports Multiplexer, MultiplexerMap, ImageLoader, MediaLoader, as well as arbitrary execution blocks to be synchronized in a single operation. The results are not type safe in this implementation so it is up to you to properly typecast the objects in the final `sync()` call.
+
+You can chain the Zipper constructor with any number of `add()` methods and the final `sync()` in one Swift statement.
+
+For example, to combine some of the requests used in the previous examples into one:
+
+```swift
+Zipper()
+	.add(myProfile)
+	.add(key: "user_8cJOiRXbugFccrUhmCX2", userProfiles)
+	.add(url: imageURL, ImageLoader.main)
+	.sync { results in
+		let myProfile = try? results[0].get() as? UserProfile
+		let otherProfile = try? results[1].get() as? UserProfile
+		let image = try? results[2].get() as UIImage
+		// ...
+	}
+```
+
+Notice how it is not necessary to retain the Zipper object. In fact in the example above it will be released after the execution of the statement despite that the `sync(completion:)` completion block may be called way later. Alternatively, you can reuse a Zipper instance for repeated calls to `sync(completion:)`, since it retains all the blocks and multiplexers added with the `add()` family methods. Beware of cyclic references that this scenario may introduce though.
+
+More information on the interface and methods can be found in the source file [MuxRepository.swift](Zipper/Zipper.swift).
+
 <a name="intro"></a>
 ## Authors
 
@@ -223,5 +252,4 @@ MuxUtils is developed by Hovik Melikyan. The source code is free to use, fork an
 
 ---
 
-
-*Documentation for Zipper and Debouncer are coming soon*
+*Documentation for Debouncer coming soon*

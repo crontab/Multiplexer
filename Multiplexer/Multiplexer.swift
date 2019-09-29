@@ -8,13 +8,11 @@
 
 import Foundation
 
-/**
-`Multiplexer<T>` is an asynchronous, callback-based caching facility for client apps. Each multiplxer instance can manage retrieval and caching of one object of type `T: Codable`, therefore it is best to define each multiplexer instance in your app as a singleton.
-
-For each multiplexer singleton you define a block that implements asynchronous retrieval of the object, which in your app will likely be a network request, e.g. to your backend system.
-
-See README.md for a more detailed discussion.
-*/
+///
+/// `Multiplexer<T>` is an asynchronous, callback-based caching facility for client apps. Each multiplxer instance can manage retrieval and caching of one object of type `T: Codable`, therefore it is best to define each multiplexer instance in your app as a singleton.
+/// For each multiplexer singleton you define a block that implements asynchronous retrieval of the object, which in your app will likely be a network request, e.g. to your backend system.
+/// See README.md for a more detailed discussion.
+///
 
 typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
 
