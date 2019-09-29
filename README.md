@@ -11,9 +11,10 @@
 - [MuxRepository](#mux-repository)
 - [Zipper](#zipper)
 - [Debouncer and DebouncerVar](#debouncer)
+- [Packages (None at the moment)](#packages)
 - [Authors](#authors)
 
-*This source code is free to use and modify; "free" as in "free as a bird". You are welcome to contribute, fork, use, modify at your own discretion. The author would be grateful if you kept his name in the source files.*
+*This source code is free to use and modify; "free" as in "free as a bird". You are welcome to use, fork, modify at your own discretion. The author hopes this source code can be useful and he would be grateful if you kept his name in the source files.*
 
 <a name="intro"></a>
 ## 1. Introduction
@@ -251,9 +252,9 @@ More information on the interface and methods can be found in the source file [M
 <a name="debouncer"></a>
 ## Debouncer and DebouncerVar
 
-`Debouncer` triggers execution of a block after a specified delay, but in addition it can postpone the execution every time `touch()` is called.
+`Debouncer` triggers execution of a block after a specified delay, but in addition it also postpones the execution every time `touch()` is called.
 
-Debouncer can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field. A Debouncer instance should be retained in your GUI object to be useful, therefore beware of cyclic references that your execution block can introduce.
+Debouncer can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field. In other words, your network request is executed only after a certain amount of time spent in "silence", which is specified by the `delay` parameter in seconds.
 
 For example, you ask the user to choose a username in your app and you want to display whether the username is available or not, as the user types in the input field. You want to make fewer network requests as the user types. Somewhere in your view controller class you can have:
 
@@ -284,11 +285,16 @@ class UsernameViewController: UIViewController {
 }
 ```
 
-A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is updated, and if the value is different from the previous one.
+A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is assigned, and if the new value is different from the previous one.
 
 More information on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/Debouncer.swift).
 
----
+<a name="packages"><a>
+## Packages
+
+None at the moment. I think git submodules are still the best way to integrate 3rd party code into your project, as you don't need to learn any new tools along with their shortcomings, quirks, glitches and a burden of maintenance that can be pretty time consuming (hello, Cocoapods). If you already know git's shortcomings, quirks (glitches?) then use submodules, I think they are worth knowing, mastering and using with 3rd party source code.
+
+The Swift Package Manager, however, is a possibility that will be considered at one point.
 
 <a name="intro"></a>
 ## Authors

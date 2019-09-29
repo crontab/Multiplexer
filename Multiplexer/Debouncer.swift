@@ -9,7 +9,7 @@
 import Foundation
 
 ///
-/// `Debouncer` triggers execution of a block after a specified delay, but in addition it can postpone the execution every time `touch()` is called. This can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field. A Debouncer instance should be retained in your GUI object to be useful, therefore beware of cyclic references that your execution block can introduce. The `touch()` method should be called at least once for the block to be executed.
+/// `Debouncer` triggers execution of a block after a specified delay, but in addition it also postpones the execution every time `touch()` is called. This can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field. A Debouncer instance should be retained in your GUI object to be useful, therefore beware of cyclic references that your execution block can introduce. The `touch()` method should be called at least once for the block to be executed.
 /// See README.md for some examples.
 ///
 class Debouncer {
@@ -44,7 +44,7 @@ class Debouncer {
 }
 
 
-/// Convenience extension to the Debouncer class:  a `DebouncerVar<T>` instance contains a value of type T that triggers `touch()` every time the value is updated.
+/// A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is assigned, and if the new value is different from the previous one.
 class DebouncerVar<T: Equatable>: Debouncer {
 
 	/// Create a DebouncerVar<T> instance that will trigger execution of the block after `delay` seconds on each value update. The block won't be executed unless the value is assigned at least once and if the new value is different from the initial one.
