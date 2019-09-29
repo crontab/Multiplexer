@@ -120,9 +120,9 @@ class CitiesViewController: UITableViewController {
 	}
 
 
-	@IBSegueAction func addCityAction(_ coder: NSCoder) -> AddCityViewController? {
-		let addCity = AddCityViewController(coder: coder)
-		addCity?.onLocationSelected = { [weak self] (location) in
+	@IBAction func addAction(_ sender: Any) {
+		let addCity = storyboard!.instantiateViewController(withIdentifier: "AddCity") as! AddCityViewController
+		addCity.onLocationSelected = { [weak self] (location) in
 			guard let self = self else { return }
 			self.locations.removeAll { $0.idAsString == location.idAsString }
 			self.isRefreshing = true
@@ -137,7 +137,7 @@ class CitiesViewController: UITableViewController {
 				}
 			}
 		}
-		return addCity
+		navigationController!.pushViewController(addCity, animated: true)
 	}
 
 

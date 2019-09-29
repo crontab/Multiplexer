@@ -48,7 +48,7 @@ class Request {
 							print("JSON error:", context.debugDescription, "-", context.codingPath.map({ $0.stringValue}).joined(separator: "/"))
 						default:
 							print("JSON error:", error.localizedDescription)
-					}
+						}
 					#endif
 					completion(.failure(AppError.app(code: "invalid_json_response")))
 				}

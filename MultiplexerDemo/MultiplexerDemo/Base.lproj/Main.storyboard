@@ -23,7 +23,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nvj-PQ-IQ0">
-                                            <rect key="frame" x="20" y="11" width="44" height="21"/>
+                                            <rect key="frame" x="20" y="11.5" width="44" height="21"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -66,7 +66,7 @@
                     <navigationItem key="navigationItem" title="Weather" id="Nzj-We-BaT">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="4XH-dP-A55">
                             <connections>
-                                <segue destination="XBU-Nn-xAh" kind="show" destinationCreationSelector="addCityAction:" id="93Y-6t-x3C"/>
+                                <action selector="addAction:" destination="IjW-dW-MO6" id="dGw-em-PTG"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -78,7 +78,7 @@
         <!--Add location-->
         <scene sceneID="rJ4-4a-ACn">
             <objects>
-                <tableViewController storyboardIdentifier="AddCity" id="XBU-Nn-xAh" customClass="AddCityViewController" customModule="Mux_Demo" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="AddCity" title="Add location" id="XBU-Nn-xAh" customClass="AddCityViewController" customModule="Mux_Demo" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="Z4I-zd-kdJ">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
