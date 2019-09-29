@@ -41,7 +41,7 @@ And some bonus utilities, such as the Debouncer.
 
 For each multiplexer singleton you define a block that implements asynchronous retrieval of the object, which in your app will likely be a network request to your backend system.
 
-A multiplexer singleton guarantees that there will only be one fetch/retrieval operation made, and that subsequently a memory-cached object will be returned to the callers of its `request(...)` method , unless the cached object expires according to the `timeToLive` setting (defaults to 30 minutes). Additionally, Multiplexer can store the object on disk - see `flush()` and also the discussion on `request(refresh:completion:)`.
+A multiplexer singleton guarantees that there will only be one fetch/retrieval operation made, and that subsequently a memory-cached object will be returned to the callers of its `request(completion:)` method , unless the cached object expires according to the `timeToLive` setting (defaults to 30 minutes). Additionally, Multiplexer can store the object on disk - see `flush()` and also the discussion on `request(completion:)`.
 
 Suppose you have a `UserProfile` class and a method of retrieving the current user's profile object from the backend, whose signature looks like this:
 
@@ -65,10 +65,10 @@ Or even shorter:
 let myProfile = Multiplexer<UserProfile>(onFetch: Backend.fetchMyProfile)
 ```
 
-To use `myProfile` to fetch the profile object, you call the `request(refresh:completion:)` method like so:
+To use `myProfile` to fetch the profile object, you call the `request(completion:)` method like so:
 
 ```swift
-myProfile.request(refresh: false) { result in
+myProfile.request { result in
 	switch result {
 	case .failure(let error)
 		print("Error:", error)
@@ -78,15 +78,9 @@ myProfile.request(refresh: false) { result in
 }
 ```
 
-When called for the first time, `request(...)` calls your `onFetch` block, returns it to your completion block as `Result<T, Error>`, and also caches the result in memory. Subsequent calls to `request(...)` will return immediately with the stored object. The `refresh` parameter tells the multiplexer to try to retrieve the object again, similarly to the browser's Cmd-R function.
+When called for the first time, `request(completion:)` calls your `onFetch` block, returns it to your completion block as `Result<T, Error>`, and also caches the result in memory. Subsequent calls to `request(completion:)` will return immediately with the stored object.
 
-Most importantly, `request(...)` can handle multiple simultaneous calls and ensures only one `onFetch` operation is initiated at a time.
-
-See also:
-
-- `init(onFetch: @escaping (@escaping OnResult) -> Void)`
-- `func request(refresh: Bool, completion: @escaping OnResult)`
-- `MultiplexerMap`
+Most importantly, `request(completion:)` can handle multiple simultaneous calls and ensures only one `onFetch` operation is initiated at a time.
 
 ### Caching
 
@@ -102,13 +96,17 @@ typealias MyCDMultiplexer<T: Codable> = MultiplexerBase<T, CDCacher<T>>
 
 At run time, you can invalidate the cached object using one of the following methods:
 
-- "Soft refresh": use the `refresh` argument in your call to `request(refresh:completion:)`: the multiplexer will attempt to fetch the object again, but will not discard the existing cached objects in memory or on disk. In case of a failure the older cached object may be used again as a result.
-- "Hard refresh": call `clear()` to discard both memory and disk caches for the given object. The next call to `request(...)` will attempt to fetch the object and will fail in case of an error.
+- "Soft refresh": chain the `refresh()` method with a call to `request(completion:)`: the multiplexer will attempt to fetch the object again, but will not discard the existing cached objects in memory or on disk. In case of a failure the older cached object may be used again as a result.
+- "Hard refresh": call `clear()` to discard both memory and disk caches for the given object. The next call to `request(completion:)` will attempt to fetch the object and will fail in case of an error.
 
 See also:
 
-- `flush()`
+- `init(onFetch: @escaping (@escaping OnResult) -> Void)`
+- `request(completion: @escaping OnResult)`
+- `refresh()`
 - `clear()`
+- `flush()`
+- `MultiplexerMap`
 - `MuxRepository`
 - `Zipper`
 
@@ -138,7 +136,7 @@ let userProfiles = MultiplexerMap<UserProfile>(onKeyFetch: Backend.fetchUserProf
 And used in the app like so:
 
 ```swift
-userProfiles.request(refresh: false, key: "user_8cJOiRXbugFccrUhmCX2") { result in
+userProfiles.request(key: "user_8cJOiRXbugFccrUhmCX2") { result in
 	switch result {
 	case .failure(let error)
 		print("Error:", error)
@@ -155,9 +153,11 @@ An important thing to note is that internally MultiplexerMap maintains a map of 
 See also:
 
 - `init(onKeyFetch: @escaping (String, @escaping OnResult) -> Void)`
-- `func request(refresh: Bool, key: String, completion: @escaping OnResult)`
-- `flush()`
+- `request(key: String, completion: @escaping OnResult)`
+- `refresh(key:)`
+- `clear(key:)`
 - `clear()`
+- `flush()`
 - `Multiplexer`
 - `MuxRepository`
 - `Zipper`

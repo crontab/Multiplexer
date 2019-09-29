@@ -10,9 +10,14 @@ import Foundation
 
 
 internal protocol MuxRepositoryProtocol: class {
-	func flush() // store memory cache on disk
-	func clearMemory() // free some memory; note that this will force a multiplexer to make a new fetch request next time
-	func clear() // clear all memory and disk caches
+	@discardableResult
+	func flush() -> Self // store memory cache on disk
+
+	@discardableResult
+	func clearMemory() -> Self // free some memory; note that this will force a multiplexer to make a new fetch request next time
+
+	@discardableResult
+	func clear() -> Self // clear all memory and disk caches
 }
 
 

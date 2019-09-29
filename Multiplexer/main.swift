@@ -9,9 +9,14 @@
 import Foundation
 
 
+private func asyncAfter(_ secs: TimeInterval, execute: @escaping () -> Void) {
+	DispatchQueue.main.asyncAfter(deadline: .now() + secs, execute: execute)
+}
+
+
 class Backend {
 	static func fetch(completion: @escaping (Result<Obj, Error>) -> Void) {
-		DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+		asyncAfter(1) {
 			print("Fetching test")
 			completion(.success(Obj(id: "0", name: "HM")))
 		}
@@ -28,35 +33,38 @@ struct Obj: Codable {
 let test = Multiplexer<Obj>(onFetch: Backend.fetch).register()
 
 let testMap = MultiplexerMap<Obj>(onKeyFetch: { (key, onResult) in
-	DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+	asyncAfter(2) {
 		print("Fetching testMap")
 		onResult(.success(Obj(id: key, name: "User \(key)")))
 	}
 }).register()
 
 
-func m() {
+func testMultiplexers() {
 
-	test.request(refresh: false) { (result) in
+	test.request { (result) in
 		print(result)
-		test.request(refresh: false) { (result) in
+		test.request { (result) in
 			print(result)
-		}
-	}
-
-
-	testMap.request(refresh: false, key: "1") { (result) in
-		print(result)
-		testMap.request(refresh: false, key: "1") { (result) in
-			print(result)
-			testMap.request(refresh: false, key: "2") { (result) in
-				print(result)
-				MuxRepository.flushAll()
-				MuxRepository.clearAll()
+			asyncAfter(2) {
+				test.refresh().request { (result) in
+					print(result)
+				}
 			}
 		}
 	}
 
+//	testMap.request(key: "1") { (result) in
+//		print(result)
+//		testMap.request(key: "1") { (result) in
+//			print(result)
+//			testMap.request(key: "2") { (result) in
+//				print(result)
+//				MuxRepository.flushAll()
+//				MuxRepository.clearAll()
+//			}
+//		}
+//	}
 
 	//test.clear()
 	//testMap.clear()
@@ -67,12 +75,12 @@ func m() {
 func z() {
 	Zipper()
 		.add({ (completion) in
-			DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+			asyncAfter(3) {
 				completion(.success("Hello"))
 			}
 		})
-		.add(refresh: false, multiplexer: test)
-		.add(refresh: false, key: "1", multiplexer: testMap)
+		.add(multiplexer: test)
+		.add(key: "1", multiplexer: testMap)
 		.sync { (results) in
 			results.forEach { print($0) }
 		}
@@ -93,11 +101,11 @@ func d() {
 	value = 2
 	// print("Update", value)
 	d?.touch()
-	DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+	asyncAfter(2) {
 		value = 3
 		// print("Update", value)
 		d?.touch()
-		DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+		asyncAfter(2) {
 			value = 4
 			// print("Update", value)
 			d?.touch()
@@ -112,7 +120,7 @@ func testImageLoader() {
 	}
 	ImageLoader.main.request(url: URL(string: "https://i.imgur.com/QXYqnI9.jpg")!) { (result) in
 		print("Image 2")
-		DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+		asyncAfter(3) {
 			print("Trying image 3")
 			ImageLoader.main.request(url: URL(string: "https://i.imgur.com/QXYqnI9.jpg")!) { (result) in
 				print("Image 3")
@@ -122,11 +130,10 @@ func testImageLoader() {
 }
 
 
-// m()
+testMultiplexers()
 // z()
 // d()
-
-testImageLoader()
+// testImageLoader()
 
 
 RunLoop.main.run()

@@ -33,15 +33,15 @@ class Zipper {
 		}
 	}
 
-	func add<T: Codable>(refresh: Bool, multiplexer: Multiplexer<T>) -> Self {
+	func add<T: Codable>(multiplexer: Multiplexer<T>) -> Self {
 		return add(type: T.self) { (onResult) in
-			multiplexer.request(refresh: refresh, completion: onResult)
+			multiplexer.request(completion: onResult)
 		}
 	}
 
-	func add<T: Codable>(refresh: Bool, key: String, multiplexer: MultiplexerMap<T>) -> Self {
+	func add<T: Codable>(key: String, multiplexer: MultiplexerMap<T>) -> Self {
 		return add(type: T.self) { (onResult) in
-			multiplexer.request(refresh: refresh, key: key, completion: onResult)
+			multiplexer.request(key: key, completion: onResult)
 		}
 	}
 

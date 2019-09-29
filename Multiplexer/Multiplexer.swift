@@ -29,6 +29,7 @@ internal class MultiplexFetcher<T: Codable> {
 	internal var completions: [OnResult] = []
 	internal var completionTime: TimeInterval = 0
 	internal var previousValue: T?
+	internal var refreshFlag: Bool = false
 
 	internal func isExpired(ttl: TimeInterval) -> Bool {
 		return Date().timeIntervalSinceReferenceDate > completionTime + ttl
@@ -45,9 +46,11 @@ internal class MultiplexFetcher<T: Codable> {
 		}
 	}
 
-	func clearMemory() {
+	@discardableResult
+	func clearMemory() -> Self {
 		completionTime = 0
 		previousValue = nil
+		return self
 	}
 }
 
@@ -66,17 +69,18 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 
 	///
 	/// Performs a request either by calling the `onFetch` block supplied in the multiplexer's constructor, or by returning the previously cached object, if available. Multiple simultaneous calls to `request(...)` are handled by the Multiplexer so that only one `onFetch` operation can be invoked at a time, but all callers of `request(...)` will eventually receive the result, whether asynchronously or synchronously.
-	/// - parameter refresh: whether to perform a "soft" refresh. Most of the time you will set it to false unless, e.g. you have updated the remote object and want to receive a fresher copy of it.
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	func request(refresh: Bool, completion: @escaping OnResult) {
+	func request(completion: @escaping OnResult) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh, let previousValue = previousValue, !isExpired(ttl: Self.timeToLive) {
+		if !refreshFlag, let previousValue = previousValue, !isExpired(ttl: Self.timeToLive) {
 			completion(.success(previousValue))
 			return
 		}
+
+		refreshFlag = false
 
 		// Append the completion block to the list of blocks to be notified when the result is available; fetch the object only if this is the first such completion block
 		if append(completion: completion) {
@@ -107,18 +111,29 @@ class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepository
 	}
 
 
+	/// "Soft" refresh: the next call to `request(completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh()` does not have an immediate effect on any ongoing asynchronous requests.
+	@discardableResult
+	func refresh() -> Self {
+		refreshFlag = true
+		return self
+	}
+
+
 	/// Discards the memory and disk caches for the given object
-	func clear() {
-		clearMemory()
+	@discardableResult
+	func clear() -> Self {
 		C.clearCache(key: Self.cacheKey, domain: nil)
+		return clearMemory()
 	}
 
 
 	/// Writes the previously cached object to disk using the default cacher interface. For the `Multiplexer` class the default cacher is `JSONDiskCacher`.
-	func flush() {
+	@discardableResult
+	func flush() -> Self {
 		if let previousValue = previousValue {
 			C.saveToCache(previousValue, key: Self.cacheKey, domain: nil)
 		}
+		return self
 	}
 
 

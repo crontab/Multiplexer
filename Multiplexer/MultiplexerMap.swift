@@ -34,19 +34,20 @@ class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 
 	///
 	/// Performs a request either by calling the `onKeyFetch` block supplied in the constructor, or by returning the previously cached object, if available, by its ID passed as the `key` parameter. Multiple simultaneous calls to `request(...)` are handled by the MultiplexerMap so that only one `onKeyFetch` operation can be invoked for each object ID at a time, but all callers of `request(...)` will eventually receive the result, whether asynchronously or synchronously.
-	/// - parameter refresh: whether to perform a "soft" refresh. Most of the time you will set it to false unless, e.g. you have updated the remote object and want to receive a fresher copy of it.
 	/// - parameter key: object ID that will be passed to onKeyFetch
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	internal func request(refresh: Bool, key: String, completion: @escaping OnResult) {
+	internal func request(key: String, completion: @escaping OnResult) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refresh, let previousValue = fetcher.previousValue, !fetcher.isExpired(ttl: Self.timeToLive) {
+		if !fetcher.refreshFlag, let previousValue = fetcher.previousValue, !fetcher.isExpired(ttl: Self.timeToLive) {
 			completion(.success(previousValue))
 			return
 		}
+
+		fetcher.refreshFlag = false
 
 		// Append the completion block to the list of blocks to be notified when the result is available; fetch the object only if this is the first such completion block
 		if fetcher.append(completion: completion) {
@@ -76,36 +77,52 @@ class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	}
 
 
-	func clearMemory(key: String) {
+	/// "Soft" refresh: the next call to `request(key:completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh(key:)` does not have an immediate effect on any ongoing asynchronous requests for a given `key`.
+	@discardableResult
+	func refresh(key: String) -> Self {
+		fetcherMap[key]?.refreshFlag = true
+		return self
+	}
+
+
+	@discardableResult
+	func clearMemory(key: String) -> Self {
 		fetcherMap.removeValue(forKey: key)
+		return self
 	}
 
 
-	func clearMemory() {
+	@discardableResult
+	func clearMemory() -> Self {
 		fetcherMap = [:]
+		return self
 	}
 
 
-	func clear(key: String) {
-		clearMemory(key: key)
+	@discardableResult
+	func clear(key: String) -> Self {
 		C.clearCache(key: key, domain: Self.cacheDomain)
+		return clearMemory(key: key)
 	}
 
 
-	/// Discards the memory and disk caches for the objects
-	func clear() {
-		clearMemory()
+	/// Discard the memory and disk caches for the objects
+	@discardableResult
+	func clear() -> Self {
 		C.clearCacheMap(domain: Self.cacheDomain)
+		return clearMemory()
 	}
 
 
 	/// Writes the previously cached objects to disk using the default cacher interface. For the `MultiplexerMap` class the default cacher is `JSONDiskCacher`.
-	func flush() {
+	@discardableResult
+	func flush() -> Self {
 		fetcherMap.forEach { (key, fetcher) in
 			if let previousValue = fetcher.previousValue {
 				C.saveToCache(previousValue, key: key, domain: Self.cacheDomain)
 			}
 		}
+		return self
 	}
 
 
