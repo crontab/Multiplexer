@@ -13,6 +13,8 @@
 - [Debouncer and DebouncerVar](#debouncer)
 - [Authors](#authors)
 
+*This source code is free to use and modify; "free" as in "free as a bird". You are welcome to contribute, fork, use, modify at your own discretion. The author would be grateful if you kept his name in the source files.*
+
 <a name="intro"></a>
 ## 1. Introduction
 
@@ -249,9 +251,9 @@ More information on the interface and methods can be found in the source file [M
 <a name="debouncer"></a>
 ## Debouncer and DebouncerVar
 
-`Debouncer` triggers execution of a block after a specified delay, but in addition it can postpone the execution every time `touch()` is called. This can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field.
+`Debouncer` triggers execution of a block after a specified delay, but in addition it can postpone the execution every time `touch()` is called.
 
-A Debouncer instance should be retained in your GUI object to be useful, therefore beware of cyclic references that your execution block can introduce. The `touch()` method should be called at least once for the block to be executed.
+Debouncer can be useful in GUI apps when e.g. a network request should be delayed while the user types in the search field. A Debouncer instance should be retained in your GUI object to be useful, therefore beware of cyclic references that your execution block can introduce.
 
 For example, you ask the user to choose a username in your app and you want to display whether the username is available or not, as the user types in the input field. You want to make fewer network requests as the user types. Somewhere in your view controller class you can have:
 
@@ -266,8 +268,8 @@ class UsernameViewController: UIViewController {
 
 		usernameDebouncer = Debouncer(delay: 1) { [weak self] in
 			guard let self = self else { return }
-			Backend.checkUsernameAvailability(username: self.usernameField.text) { result in
-				self.usernameTakenView.isHidden = result
+			Backend.checkUsernameAvailability(username: self.usernameField.text) { [weak self] result in
+				self?.usernameTakenView.isHidden = result
 			}
 		}
 
@@ -286,11 +288,9 @@ A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T th
 
 More information on each interface and their methods can be found in the source file [CachingLoader.swift](Multiplexer/Debouncer.swift).
 
+---
+
 <a name="intro"></a>
 ## Authors
 
-MuxUtils is developed by Hovik Melikyan. The source code is free to use, fork and modify; "free" as in "free as a bird".
-
----
-
-*Documentation for Debouncer coming soon*
+MuxUtils is developed by Hovik Melikyan.
