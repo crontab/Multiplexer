@@ -14,7 +14,7 @@ import Foundation
 #if !NO_UIKIT
 	#if os(OSX)
 		import Cocoa
-		typealias UIImage = NSImage
+		public typealias UIImage = NSImage
 	#elseif os(iOS)
 		import UIKit
 	#endif

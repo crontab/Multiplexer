@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		36E8FDE62340CA0500E34B07 /* Multiplexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 36E8FDDC2340CA0500E34B07 /* Multiplexer.framework */; };
-		36E8FDEB2340CA0500E34B07 /* MultiplexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDEA2340CA0500E34B07 /* MultiplexerTests.swift */; };
 		36E8FDED2340CA0500E34B07 /* Multiplexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 36E8FDDF2340CA0500E34B07 /* Multiplexer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		36E8FE022340CB0100E34B07 /* FileManagerEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDF62340CB0100E34B07 /* FileManagerEx.swift */; };
 		36E8FE032340CB0100E34B07 /* MultiplexerMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDF72340CB0100E34B07 /* MultiplexerMap.swift */; };
@@ -21,26 +19,12 @@
 		36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDFF2340CB0100E34B07 /* Zipper.swift */; };
 		36E8FE0C2340CB0100E34B07 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE002340CB0100E34B07 /* Debouncer.swift */; };
 		36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE012340CB0100E34B07 /* FileDownloader.swift */; };
-		36E8FE0F2340D32500E34B07 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 36E8FE0E2340D32500E34B07 /* README.md */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		36E8FDE72340CA0500E34B07 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 36E8FDD32340CA0500E34B07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 36E8FDDB2340CA0500E34B07;
-			remoteInfo = Multiplexer;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		36E8FDDC2340CA0500E34B07 /* Multiplexer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Multiplexer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		36E8FDDF2340CA0500E34B07 /* Multiplexer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Multiplexer.h; sourceTree = "<group>"; };
 		36E8FDE02340CA0500E34B07 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		36E8FDE52340CA0500E34B07 /* MultiplexerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultiplexerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		36E8FDEA2340CA0500E34B07 /* MultiplexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplexerTests.swift; sourceTree = "<group>"; };
-		36E8FDEC2340CA0500E34B07 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		36E8FDF62340CB0100E34B07 /* FileManagerEx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileManagerEx.swift; sourceTree = "<group>"; };
 		36E8FDF72340CB0100E34B07 /* MultiplexerMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiplexerMap.swift; sourceTree = "<group>"; };
 		36E8FDF82340CB0100E34B07 /* Multiplexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Multiplexer.swift; sourceTree = "<group>"; };
@@ -63,14 +47,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		36E8FDE22340CA0500E34B07 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				36E8FDE62340CA0500E34B07 /* Multiplexer.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -79,7 +55,6 @@
 			children = (
 				36E8FE0E2340D32500E34B07 /* README.md */,
 				36E8FDDE2340CA0500E34B07 /* Multiplexer */,
-				36E8FDE92340CA0500E34B07 /* MultiplexerTests */,
 				36E8FDDD2340CA0500E34B07 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,7 +63,6 @@
 			isa = PBXGroup;
 			children = (
 				36E8FDDC2340CA0500E34B07 /* Multiplexer.framework */,
-				36E8FDE52340CA0500E34B07 /* MultiplexerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -111,15 +85,6 @@
 				36E8FDE02340CA0500E34B07 /* Info.plist */,
 			);
 			path = Multiplexer;
-			sourceTree = "<group>";
-		};
-		36E8FDE92340CA0500E34B07 /* MultiplexerTests */ = {
-			isa = PBXGroup;
-			children = (
-				36E8FDEA2340CA0500E34B07 /* MultiplexerTests.swift */,
-				36E8FDEC2340CA0500E34B07 /* Info.plist */,
-			);
-			path = MultiplexerTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -154,24 +119,6 @@
 			productReference = 36E8FDDC2340CA0500E34B07 /* Multiplexer.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		36E8FDE42340CA0500E34B07 /* MultiplexerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 36E8FDF32340CA0500E34B07 /* Build configuration list for PBXNativeTarget "MultiplexerTests" */;
-			buildPhases = (
-				36E8FDE12340CA0500E34B07 /* Sources */,
-				36E8FDE22340CA0500E34B07 /* Frameworks */,
-				36E8FDE32340CA0500E34B07 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				36E8FDE82340CA0500E34B07 /* PBXTargetDependency */,
-			);
-			name = MultiplexerTests;
-			productName = MultiplexerTests;
-			productReference = 36E8FDE52340CA0500E34B07 /* MultiplexerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -185,9 +132,6 @@
 					36E8FDDB2340CA0500E34B07 = {
 						CreatedOnToolsVersion = 11.0;
 						LastSwiftMigration = 1100;
-					};
-					36E8FDE42340CA0500E34B07 = {
-						CreatedOnToolsVersion = 11.0;
 					};
 				};
 			};
@@ -205,21 +149,12 @@
 			projectRoot = "";
 			targets = (
 				36E8FDDB2340CA0500E34B07 /* Multiplexer */,
-				36E8FDE42340CA0500E34B07 /* MultiplexerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		36E8FDDA2340CA0500E34B07 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				36E8FE0F2340D32500E34B07 /* README.md in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		36E8FDE32340CA0500E34B07 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -247,23 +182,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		36E8FDE12340CA0500E34B07 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				36E8FDEB2340CA0500E34B07 /* MultiplexerTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		36E8FDE82340CA0500E34B07 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 36E8FDDB2340CA0500E34B07 /* Multiplexer */;
-			targetProxy = 36E8FDE72340CA0500E34B07 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		36E8FDEE2340CA0500E34B07 /* Debug */ = {
@@ -441,44 +360,6 @@
 			};
 			name = Release;
 		};
-		36E8FDF42340CA0500E34B07 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 639KEQWW6F;
-				INFOPLIST_FILE = MultiplexerTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.MultiplexerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		36E8FDF52340CA0500E34B07 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 639KEQWW6F;
-				INFOPLIST_FILE = MultiplexerTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.MultiplexerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -496,15 +377,6 @@
 			buildConfigurations = (
 				36E8FDF12340CA0500E34B07 /* Debug */,
 				36E8FDF22340CA0500E34B07 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		36E8FDF32340CA0500E34B07 /* Build configuration list for PBXNativeTarget "MultiplexerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				36E8FDF42340CA0500E34B07 /* Debug */,
-				36E8FDF52340CA0500E34B07 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
