@@ -36,9 +36,9 @@ class CityCell: UITableViewCell {
 class CitiesViewController: UITableViewController {
 
 	// Cache weather information per location for 30 minutes. This can be helpful when e.g. re-adding a previously removed city. Pull-to-refresh though causes a refresh of data anyway.
-	static var fullLocationMux = MultiplexerMap<FullLocation> { (id, onResult) in
+	static var fullLocationMux = MultiplexerMap<FullLocation>(onKeyFetch: { (id, onResult) in
 		Backend.fetchWeather(locationId: id, completion: onResult)
-	}
+	}).register()
 
 
 	private var locations: [FullLocation] = []

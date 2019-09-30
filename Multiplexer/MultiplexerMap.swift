@@ -116,8 +116,9 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	@discardableResult
 	public func flush() -> Self {
 		fetcherMap.forEach { (key, fetcher) in
-			if let previousValue = fetcher.previousValue {
+			if fetcher.isDirty, let previousValue = fetcher.previousValue {
 				C.saveToCache(previousValue, key: key, domain: Self.cacheDomain)
+				fetcher.isDirty = false
 			}
 		}
 		return self

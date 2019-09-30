@@ -25,8 +25,15 @@ public class MultiplexFetcher<T: Codable> {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	internal var completions: [OnResult] = []
+
 	internal var completionTime: TimeInterval = 0
-	internal var previousValue: T?
+
+	internal var isDirty: Bool = false
+
+	internal var previousValue: T? {
+		didSet { isDirty = previousValue != nil }
+	}
+
 	internal var refreshFlag: Bool = false
 
 	internal func isExpired(ttl: TimeInterval) -> Bool {
@@ -128,8 +135,9 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	/// Writes the previously cached object to disk using the default cacher interface. For the `Multiplexer` class the default cacher is `JSONDiskCacher`.
 	@discardableResult
 	public func flush() -> Self {
-		if let previousValue = previousValue {
+		if isDirty, let previousValue = previousValue {
 			C.saveToCache(previousValue, key: Self.cacheKey, domain: nil)
+			isDirty = false
 		}
 		return self
 	}

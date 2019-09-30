@@ -210,7 +210,7 @@ More information on each interface and their methods can be found in the source 
 
 `MuxRepository` is a static interface that can be used for centralized operations such as `clearAll()` and `flushAll()` on all multiplexer/downloader instances in your app. You should register each instance using the `register()` method on each multiplexer or downloader instance. Note that MuxRepository retains the objects, which generally should not be a problem for singletons. Use `unregister()` in case you need to release an instance previously registered with the repository.
 
-By default, the Multiplexer and MultiplexerMap interfaces don't store objects on disk. If you want to keep the objects to ensure they can survive app reboots, call `MuxRepository.flushAll()` in your app's `applicationWillResignActive(_:)` and `applicationWillTerminate(_:)` (both, because the former is not called in certain scenarios, such as a low battery shutdown). Make sure `flushAll()` is performed only once, since in some scenarios both - applicationWillTerminate and applicationWillResignActive - can be called by the system.
+By default, the Multiplexer and MultiplexerMap interfaces don't store objects on disk. If you want to keep the objects to ensure they can survive app reboots, enable the `MuxRepository.automaticFlush` option at program startup. This will ensure all registered multiplexers write their data on disk when the app enters background (iOS only).
 
 `MuxRepository.clearAll()` discards all memory and disk objects. This is useful when e.g. the user signs out of your system and you need to make sure no traces are left of data related to the given user in memory or disk.
 

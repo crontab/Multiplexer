@@ -8,6 +8,10 @@
 
 import Foundation
 
+#if !NO_UIKIT && os(iOS)
+	import UIKit
+#endif
+
 
 public protocol MuxRepositoryProtocol: class {
 	@discardableResult
@@ -29,15 +33,46 @@ public class MuxRepository {
 		repo.values.forEach { $0.clear() }
 	}
 
-	/// Writes all memory-cached objects to disk for each of the registered Multiplexer objects. The default implementations of `Multiplexer<T>` and `MultiplexerMap<T>` use simple file-based JSON caching. `flushAll()` can be called when the app is sent to background or terminated on iOS, i.e. on `applicationWillResignActive(_:)` and `applicationWillTerminate(_:)` (both, because the former is not called in certain scenarios, such as a low battery shutdown). Note that multiplexer objects themselves never write data automatically; i.e. the objects are cached only in memory unless you explicitly call `flush()` on a multiplexer, or `flushAll()` on the  global repository.
+	/// Writes all memory-cached objects to disk for each of the registered Multiplexer objects. The default implementations of `Multiplexer<T>` and `MultiplexerMap<T>` use simple file-based JSON caching. On iOS MuxRepository can call this method automatically when the app is sent to background if you set `MuxRepository.automaticaFlush` to `true` (presumably at program startup).
 	public static func flushAll() {
-		repo.values.forEach { $0.flush() }
+		repo.values.forEach {
+			$0.flush()
+		}
 	}
 
 	/// Free all memory-cached objects. This will force all multiplexer objects make a new fetch on the next call to `request(completion:)`. This method can be called on memory warnings coming from the OS.
 	public static func clearMemory() {
 		repo.values.forEach { $0.clearMemory() }
 	}
+
+
+	#if !NO_UIKIT && os(iOS)
+
+	/// If set to `true`, automatically calls `flushAll()` each time the app is sent to background. `flushAll()` ensures only "dirty" objects are written to disk, i.e. those that haven't been written yet.
+	public static var automaticFlush: Bool = false {
+		didSet {
+			let center = NotificationCenter.default
+			if automaticFlush {
+				center.addObserver(self, selector: #selector(appWillMoveToBackground), name: UIApplication.willResignActiveNotification, object: nil)
+			}
+			else {
+				center.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+			}
+		}
+	}
+
+	@objc static func appWillMoveToBackground() {
+		guard !repo.isEmpty else { return }
+		flushAll()
+		#if DEBUG
+			print("Flushing \(repo.count) registered multiplexers")
+		#endif
+	}
+
+	#endif
+
+
+	// - - -
 
 	private static var repo: [ObjectIdentifier: MuxRepositoryProtocol] = [:]
 
