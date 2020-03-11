@@ -101,6 +101,18 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 			return
 		}
 
+		// File URL, i.e. it's a local file, no need to queue or download
+		if url.isFileURL {
+			if let object = prepareMemoryObject(cacheFileURL: url) {
+				memCache[url.absoluteString as NSString] = object
+				completion(.success(object))
+			}
+			else {
+				completion(.failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load file from disk"])))
+			}
+			return
+		}
+
 		// Queue requests to be called later at once, when the result becomes available; the first request triggers the download:
 		if var completionQueue = completions[url], !completionQueue.isEmpty {
 			completionQueue.append(completion)
@@ -125,7 +137,13 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 
 	/// Can be called to check whether a given object is available locally or it will be downloaded on next call to `request(...)`
 	public func willRefresh(url: URL) -> Bool {
-		return memCache[url.absoluteString as NSString] == nil || !FileManager.exists(cacheFileURLFor(url: url, create: false))
+		if memCache[url.absoluteString as NSString] != nil {
+			return false
+		}
+		if url.isFileURL {
+			return false
+		}
+		return !FileManager.exists(cacheFileURLFor(url: url, create: false))
 	}
 
 
