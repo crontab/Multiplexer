@@ -35,6 +35,9 @@ class AddCityViewController: UITableViewController, UISearchBarDelegate {
 
 
 	private func performSearch(_ text: String) {
+		guard !text.isEmpty else {
+			return
+		}
 		Backend.search(text: text) { (result) in
 			switch result {
 			case .failure(let error):
