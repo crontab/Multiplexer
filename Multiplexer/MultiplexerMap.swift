@@ -56,19 +56,16 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 		onKeyFetch(key) { (newResult) in
 			switch newResult {
 
-			case .success(let newValue):
-				fetcher.completionTime = Date().timeIntervalSinceReferenceDate
-				fetcher.previousValue = newValue
-				fetcher.complete(result: newResult)
+			case .success:
+				fetcher.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
 				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
-					fetcher.previousValue = cachedValue
-					fetcher.complete(result: .success(cachedValue))
+					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
+					fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
 				else {
-					fetcher.clearMemory()
-					fetcher.complete(result: newResult)
+					fetcher.triggerCompletions(result: newResult, completionTime: nil)
 				}
 			}
 		}

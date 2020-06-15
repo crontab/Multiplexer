@@ -24,32 +24,47 @@ let STANDARD_TTL: TimeInterval = 30 * 60
 public class MultiplexFetcher<T: Codable> {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
-	internal var completions: [OnResult] = []
+	private var completions: [OnResult] = []
+	private var completionTime: TimeInterval = 0
 
-	internal var completionTime: TimeInterval = 0
-
-	internal var isDirty: Bool = false
-
-	internal var previousValue: T? {
+	internal private(set) var previousValue: T? {
 		didSet { isDirty = previousValue != nil }
 	}
 
+	internal var isDirty: Bool = false
 	internal var refreshFlag: Bool = false
+
 
 	internal func isExpired(ttl: TimeInterval) -> Bool {
 		return Date().timeIntervalSinceReferenceDate > completionTime + ttl
 	}
+
 
 	internal func append(completion: @escaping OnResult) -> Bool {
 		completions.append(completion)
 		return completions.count > 1
 	}
 
-	internal func complete(result: Result<T, Error>) {
+
+	internal func triggerCompletions(result: Result<T, Error>, completionTime: TimeInterval?) {
+		switch result {
+
+		case .success(let value):
+			// If the completion time was specified, make sure it's newer than the previos one and update the value
+			if let completionTime = completionTime {
+				self.completionTime = completionTime
+			}
+			previousValue = value
+
+		case .failure:
+			clearMemory()
+		}
+
 		while !completions.isEmpty {
 			completions.removeFirst()(result)
 		}
 	}
+
 
 	@discardableResult
 	public func clearMemory() -> Self {
@@ -96,20 +111,16 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 		onFetch { (newResult) in
 			switch newResult {
 
-			case .success(let newValue):
-				self.completionTime = Date().timeIntervalSinceReferenceDate
-				self.previousValue = newValue
-				self.complete(result: newResult)
+			case .success:
+				self.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
 				if Self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
-					self.previousValue = cachedValue
-					self.complete(result: .success(cachedValue))
+					self.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
 				else {
-					self.clearMemory()
-					self.complete(result: newResult)
+					self.triggerCompletions(result: newResult, completionTime: nil)
 				}
 			}
 		}
