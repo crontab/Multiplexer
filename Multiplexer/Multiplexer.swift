@@ -17,7 +17,7 @@ import Foundation
 public typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<String, T>>
 
 
-let STANDARD_TTL: TimeInterval = 30 * 60
+public var MuxDefaultTTL: TimeInterval = 30 * 60
 
 
 /// Internal class that's reused in `MultiplexerBase` and `MultiplexerMapBase`
@@ -159,7 +159,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 
 
 	/// Determines when the Multiplexer should attempt to fetch a fresh copy of the object again. Applies to the memory cache only. Defaults to 30 minutes.
-	public class var timeToLive: TimeInterval { STANDARD_TTL }
+	public class var timeToLive: TimeInterval { MuxDefaultTTL }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.

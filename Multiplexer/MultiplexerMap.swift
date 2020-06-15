@@ -127,7 +127,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 
 
 	/// Determines when the Multiplexer should attempt to fetch a fresh copy of the object again. Applies to the memory cache only. Defaults to 30 minutes.
-	public class var timeToLive: TimeInterval { STANDARD_TTL }
+	public class var timeToLive: TimeInterval { MuxDefaultTTL }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the directory name on disk in the local cache directory. Each object iss stored in the directory as a JSON file with the object ID as a file name, plus the `.json` extension. For DB-based cachers `cacheDomain` can be the table name. By default returns the object class name, e.g. for `MultiplexerMap<UserProfile>` the cache directory name will be "UserProfile.Map" in the cache directory.
