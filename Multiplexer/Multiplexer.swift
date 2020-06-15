@@ -14,7 +14,7 @@ import Foundation
 /// See README.md for a more detailed discussion.
 ///
 
-public typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<T>>
+public typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<String, T>>
 
 
 let STANDARD_TTL: TimeInterval = 30 * 60

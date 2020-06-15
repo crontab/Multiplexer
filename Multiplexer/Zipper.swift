@@ -54,7 +54,7 @@ public class Zipper {
 
 	/// Add a multiplexer map object to the zipper. This multiplexer's `request(key:completion:)` will be called as part of the zipper chain.
 	@discardableResult
-	public func add<T: Codable>(key: String, _ multiplexer: MultiplexerMap<T>) -> Self {
+	public func add<K: MuxKey, T: Codable>(key: K, _ multiplexer: MultiplexerMap<K, T>) -> Self {
 		return add(type: T.self) { (onResult) in
 			multiplexer.request(key: key, completion: onResult)
 		}

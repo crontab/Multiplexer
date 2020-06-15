@@ -117,11 +117,11 @@ See also:
 More detailed descriptions on each method can be found in the source file [Multiplexer.swift](Multiplexer/Multiplexer.swift).
 
 <a name="multiplexer-map"></a>
-## MultiplexerMap<T>
+## MultiplexerMap<K, T>
 
-`MultiplexerMap<T>` is similar to `Multiplexer<T>` in many ways except it maintains a dictionary of objects of the same type. One example would be e.g. user profile objects in your social app.
+`MultiplexerMap<K, T>` is similar to `Multiplexer<T>` in many ways except it maintains a dictionary of objects of the same type. One example would be e.g. user profile objects in your social app.
 
-The hash key for the MultiplexerMap interface is not generic and is assumed to be `String`. This is because object ID's are mostly strings in modern backend systems, plus it simplifies the `Cacher`'s job of storing objects on disk or a database.
+The `K` generic paramter should conform to  `LosslessStringConvertible & Hashable`. The string convertibility requirement is because it simplifies the `Cacher`'s job of storing objects on disk or a database.
 
 The examples given for the Multiplexer above will look as follows. Firstly, suppose you have a method for retrieving a user profile by a user ID:
 
@@ -134,7 +134,7 @@ class Backend {
 Further, the MultiplexerMap singleton can be defined as follows:
 
 ```swift
-let userProfiles = MultiplexerMap<UserProfile>(onKeyFetch: Backend.fetchUserProfile)
+let userProfiles = MultiplexerMap<String, UserProfile>(onKeyFetch: Backend.fetchUserProfile)
 ```
 
 And used in the app like so:
@@ -156,10 +156,10 @@ An important thing to note is that internally MultiplexerMap maintains a map of 
 
 See also:
 
-- `init(onKeyFetch: @escaping (String, @escaping OnResult) -> Void)`
-- `request(key: String, completion: @escaping OnResult)`
-- `refresh(key:)`
-- `clear(key:)`
+- `init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void)`
+- `request(key: K, completion: @escaping OnResult)`
+- `refresh(key: K)`
+- `clear(key: K)`
 - `clear()`
 - `flush()`
 - [`Multiplexer`](#multiplexer)

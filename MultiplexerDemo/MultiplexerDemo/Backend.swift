@@ -11,8 +11,8 @@ import Foundation
 
 class Backend {
 
-	static func fetchWeather(locationId: String, completion: @escaping (Result<FullLocation, Error>) -> Void) {
-		Request(path: "/location/\(locationId.toUrlEncoded())/").perform(type: FullLocation.self, completion: completion)
+	static func fetchWeather(locationId: Int, completion: @escaping (Result<FullLocation, Error>) -> Void) {
+		Request(path: "/location/\(locationId)/").perform(type: FullLocation.self, completion: completion)
 	}
 
 	static func search(text: String, completion: @escaping (Result<[Location], Error>) -> Void) {

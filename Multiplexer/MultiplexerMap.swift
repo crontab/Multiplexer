@@ -9,16 +9,16 @@
 import Foundation
 
 ///
-/// `MultiplexerMap<T>` is similar to `Multiplexer<T>` in many ways except it maintains a dictionary of objects of the same type. One example would be e.g. user profile objects in your social app.
-/// The hash key for the MultiplexerMap interface is not generic and is assumed to be `String`. This is because object ID's are mostly strings in modern backend systems, plus it simplifies the `Cacher`'s job of storing objects on disk or a database.
+/// `MultiplexerMap<K, T>` is similar to `Multiplexer<T>` in many ways except it maintains a dictionary of objects of the same type. One example would be e.g. user profile objects in your social app.
+/// The `K` generic paramter should conform to  `LosslessStringConvertible & Hashable`. The string convertibility requirement is because it simplifies the `Cacher`'s job of storing objects on disk or a database.
 /// See README.md for a more detailed discussion.
 ///
 
-public typealias MultiplexerMap<T: Codable> = MultiplexerMapBase<T, JSONDiskCacher<T>>
+public typealias MultiplexerMap<K: MuxKey, T: Codable> = MultiplexerMapBase<K, T, JSONDiskCacher<K, T>>
 
 
 /// MultiplexerMap base class that can be combined with a static `Cacher` implementation in a typealias.
-public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
+public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	///
@@ -26,7 +26,7 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	/// - parameter onKeyFetch: this block should retrieve an object by its ID, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
 
-	public init(onKeyFetch: @escaping (String, @escaping OnResult) -> Void) {
+	public init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
 		self.onKeyFetch = onKeyFetch
 	}
 
@@ -36,7 +36,7 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	public func request(key: String, completion: @escaping OnResult) {
+	public func request(key: K, completion: @escaping OnResult) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
@@ -74,14 +74,14 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 
 	/// "Soft" refresh: the next call to `request(key:completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh(key:)` does not have an immediate effect on any ongoing asynchronous requests for a given `key`.
 	@discardableResult
-	public func refresh(key: String) -> Self {
+	public func refresh(key: K) -> Self {
 		fetcherMap[key]?.refreshFlag = true
 		return self
 	}
 
 
 	@discardableResult
-	public func clearMemory(key: String) -> Self {
+	public func clearMemory(key: K) -> Self {
 		fetcherMap.removeValue(forKey: key)
 		return self
 	}
@@ -95,7 +95,7 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 
 
 	@discardableResult
-	public func clear(key: String) -> Self {
+	public func clear(key: K) -> Self {
 		C.clearCache(key: key, domain: Self.cacheDomain)
 		return clearMemory(key: key)
 	}
@@ -136,11 +136,11 @@ public class MultiplexerMapBase<T: Codable, C: Cacher>: MuxRepositoryProtocol {
 
 	private typealias Fetcher = MultiplexFetcher<T>
 
-	private let onKeyFetch: (String, @escaping OnResult) -> Void
+	private let onKeyFetch: (K, @escaping OnResult) -> Void
 
-	private var fetcherMap: [String: Fetcher] = [:]
+	private var fetcherMap: [K: Fetcher] = [:]
 
-	private func fetcherForKey(_ key: String) -> Fetcher {
+	private func fetcherForKey(_ key: K) -> Fetcher {
 		var fetcher = fetcherMap[key]
 		if fetcher == nil {
 			fetcher = Fetcher()

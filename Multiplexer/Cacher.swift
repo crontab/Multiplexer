@@ -9,21 +9,24 @@
 import Foundation
 
 
+public typealias MuxKey = LosslessStringConvertible & Hashable
+
+
 public protocol Cacher {
 	associatedtype T: Codable
-	typealias K = String
+	associatedtype K: MuxKey
 
-	static func loadFromCache<T: Codable>(key: K, domain: String?) -> T?
-	static func saveToCache<T: Codable>(_ result: T, key: K, domain: String?)
-	static func clearCache(key: K, domain: String?)
+	static func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T?
+	static func saveToCache<K: MuxKey, T: Codable>(_ result: T, key: K, domain: String?)
+	static func clearCache<K: MuxKey>(key: K, domain: String?)
 	static func clearCacheMap(domain: String)
 }
 
 
-public final class NoCacher<T: Codable>: Cacher {
-	public static func loadFromCache<T: Codable>(key: K, domain: String?) -> T? { nil }
-	public static func saveToCache<T: Codable>(_ result: T, key: K, domain: String?) { }
-	public static func clearCache(key: K, domain: String?) { }
+public final class NoCacher<K: MuxKey, T: Codable>: Cacher {
+	public static func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T? { nil }
+	public static func saveToCache<K: MuxKey, T: Codable>(_ result: T, key: K, domain: String?) { }
+	public static func clearCache<K: MuxKey>(key: K, domain: String?) { }
 	public static func clearCacheMap(domain: String) { }
 }
 
@@ -32,17 +35,17 @@ private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
 private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 
-public final class JSONDiskCacher<T: Codable>: Cacher {
+public final class JSONDiskCacher<K: MuxKey, T: Codable>: Cacher {
 
-	public static func loadFromCache<T: Codable>(key: K, domain: String?) -> T? {
+	public static func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T? {
 		return try? jsonDecoder.decode(T.self, from: Data(contentsOf: cacheFileURL(key: key, domain: domain, create: false)))
 	}
 
-	public static func saveToCache<T: Codable>(_ result: T, key: K, domain: String?) {
+	public static func saveToCache<K: MuxKey, T: Codable>(_ result: T, key: K, domain: String?) {
 		try! jsonEncoder.encode(result).write(to: cacheFileURL(key: key, domain: domain, create: true), options: .atomic)
 	}
 
-	public static func clearCache(key: K, domain: String?) {
+	public static func clearCache<K: MuxKey>(key: K, domain: String?) {
 		FileManager.removeRecursively(cacheFileURL(key: key, domain: domain, create: false))
 	}
 
@@ -50,7 +53,7 @@ public final class JSONDiskCacher<T: Codable>: Cacher {
 		FileManager.removeRecursively(cacheDirURL(domain: domain, create: false))
 	}
 
-	private static func cacheFileURL(key: K, domain: String?, create: Bool) -> URL {
+	private static func cacheFileURL<K: MuxKey>(key: K, domain: String?, create: Bool) -> URL {
 		return cacheDirURL(domain: domain, create: create).appendingPathComponent(key.description).appendingPathExtension("json")
 	}
 

@@ -22,8 +22,6 @@ class Location: Codable {
 	var title: String		// "London"
 	var timezone: String?	// "Europe/London"
 	var lattLong: String	// "51.506321,-0.12714"
-
-	var idAsString: String { String(woeid) }
 }
 
 
@@ -52,6 +50,4 @@ class FullLocation: Codable {
 	var title: String		// "London"
 	var timezone: String?	// "Europe/London"
 	var lattLong: String	// "51.506321,-0.12714"
-
-	var idAsString: String { String(woeid) }
 }

@@ -10,7 +10,7 @@ import UIKit
 import Multiplexer
 
 
-let initialLocationIDs = ["2459115", "44418", "615702", "650272", "1118370"] // NY, London, Paris, Frankfurt, Tokyo
+let initialLocationIDs = [2459115, 44418, 615702, 650272, 1118370] // NY, London, Paris, Frankfurt, Tokyo
 
 
 class CityCell: UITableViewCell {
@@ -36,7 +36,7 @@ class CityCell: UITableViewCell {
 class CitiesViewController: UITableViewController {
 
 	// Cache weather information per location for 30 minutes. This can be helpful when e.g. re-adding a previously removed city. Pull-to-refresh though causes a refresh of data anyway.
-	static var fullLocationMux = MultiplexerMap<FullLocation>(onKeyFetch: { (id, onResult) in
+	static var fullLocationMux = MultiplexerMap<Int, FullLocation>(onKeyFetch: { (id, onResult) in
 		Backend.fetchWeather(locationId: id, completion: onResult)
 	}).register()
 
@@ -58,11 +58,11 @@ class CitiesViewController: UITableViewController {
 
 
 	@objc func didPullToRefresh() {
-		refreshLocations(force: true, locationIDs: locations.map { $0.idAsString })
+		refreshLocations(force: true, locationIDs: locations.map { $0.woeid })
 	}
 
 
-	private func refreshLocations(force: Bool, locationIDs: [String]) {
+	private func refreshLocations(force: Bool, locationIDs: [Int]) {
 		guard !isRefreshing else {
 			return
 		}
@@ -98,7 +98,7 @@ class CitiesViewController: UITableViewController {
 			else {
 				// Make sure the order is correct (it should be, unless there is a bug in the Multiplexer framework)
 				for i in locationIDs.indices {
-					precondition(self.locations[i].idAsString == locationIDs[i])
+					precondition(self.locations[i].woeid == locationIDs[i])
 				}
 				self.tableView.reloadData()
 			}
@@ -124,9 +124,9 @@ class CitiesViewController: UITableViewController {
 		let addCity = storyboard!.instantiateViewController(withIdentifier: "AddCity") as! AddCityViewController
 		addCity.onLocationSelected = { [weak self] (location) in
 			guard let self = self else { return }
-			self.locations.removeAll { $0.idAsString == location.idAsString }
+			self.locations.removeAll { $0.woeid == location.woeid }
 			self.isRefreshing = true
-			Self.fullLocationMux.request(key: location.idAsString) { (result) in
+			Self.fullLocationMux.request(key: location.woeid) { (result) in
 				self.isRefreshing = false
 				switch result {
 				case .failure(let error):
