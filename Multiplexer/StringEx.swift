@@ -32,7 +32,7 @@ public extension Data {
 	}
 
 	func toURLSafeBase64() -> String {
-		return base64EncodedString().replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "+", with: "_").replacingOccurrences(of: "=", with: "")
+		return base64EncodedString().replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "=", with: "")
 	}
 
 	func toSHA256() -> Data {
