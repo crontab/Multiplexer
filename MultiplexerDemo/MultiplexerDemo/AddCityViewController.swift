@@ -39,10 +39,7 @@ class AddCityViewController: UITableViewController, UISearchBarDelegate {
 			return
 		}
 		Backend.search(text: text) { (result) in
-			switch result {
-			case .failure(let error):
-				self.alert(error)
-			case .success(let locations):
+			self.ensure(result) { (locations) in
 				self.results = locations
 				self.tableView.reloadData()
 			}

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		369BE854249A21C100178340 /* ResultEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 369BE853249A21C100178340 /* ResultEx.swift */; };
 		36E8FDED2340CA0500E34B07 /* Multiplexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 36E8FDDF2340CA0500E34B07 /* Multiplexer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		36E8FE022340CB0100E34B07 /* FileManagerEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDF62340CB0100E34B07 /* FileManagerEx.swift */; };
 		36E8FE032340CB0100E34B07 /* MultiplexerMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDF72340CB0100E34B07 /* MultiplexerMap.swift */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		369BE853249A21C100178340 /* ResultEx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultEx.swift; sourceTree = "<group>"; };
 		36E8FDDC2340CA0500E34B07 /* Multiplexer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Multiplexer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		36E8FDDF2340CA0500E34B07 /* Multiplexer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Multiplexer.h; sourceTree = "<group>"; };
 		36E8FDE02340CA0500E34B07 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 				36E8FE012340CB0100E34B07 /* FileDownloader.swift */,
 				36E8FDF62340CB0100E34B07 /* FileManagerEx.swift */,
 				36E8FDFE2340CB0100E34B07 /* StringEx.swift */,
+				369BE853249A21C100178340 /* ResultEx.swift */,
 				36E8FDDF2340CA0500E34B07 /* Multiplexer.h */,
 				36E8FDE02340CA0500E34B07 /* Info.plist */,
 			);
@@ -177,6 +180,7 @@
 				36E8FE0A2340CB0100E34B07 /* StringEx.swift in Sources */,
 				36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */,
 				36E8FE082340CB0100E34B07 /* ErrorEx.swift in Sources */,
+				369BE854249A21C100178340 /* ResultEx.swift in Sources */,
 				36E8FE022340CB0100E34B07 /* FileManagerEx.swift in Sources */,
 				36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */,
 			);

@@ -128,10 +128,7 @@ class CitiesViewController: UITableViewController {
 			self.isRefreshing = true
 			Self.fullLocationMux.request(key: location.woeid) { (result) in
 				self.isRefreshing = false
-				switch result {
-				case .failure(let error):
-					self.alert(error)
-				case .success(let fullLocation):
+				self.ensure(result) { (fullLocation) in
 					self.locations.insert(fullLocation, at: 0)
 					self.tableView.reloadData()
 				}

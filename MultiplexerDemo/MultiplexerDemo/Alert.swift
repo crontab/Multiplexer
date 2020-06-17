@@ -7,9 +7,23 @@
 //
 
 import UIKit
+import Multiplexer
 
 
 extension UIViewController {
+
+	func ensure<Success, Failure>(_ result: Result<Success, Failure>, onSuccess: (Success) -> Void) {
+		switch result {
+		case .success(let success):
+			onSuccess(success)
+		case .failure(let error):
+			alert(error)
+		}
+	}
+
+	func alert(_ error: Error) {
+		alert(error, onDismissed: nil)
+	}
 
 	func alert(_ error: Error, onDismissed: (() -> Void)? = nil) {
 		alert(title: "Oops...", message: error.localizedDescription, onDismissed: onDismissed)
