@@ -102,12 +102,12 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 		}
 
 		// Queue requests to be called later at once, when the result becomes available; the first request triggers the download:
-		if var completionQueue = completions[url], !completionQueue.isEmpty {
-			completionQueue.append(completion)
-		}
-		else {
+		if completions[url] == nil {
 			completions[url] = [completion]
 			fetch(url: url, progress: progress)
+		}
+		else {
+			completions[url]!.append(completion)
 		}
 	}
 
@@ -225,7 +225,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 
 	private func complete(url: URL, result: Result<T, Error>) {
-		while let completionQueue = completions[url], !completionQueue.isEmpty {
+		while !(completions[url]?.isEmpty ?? true) {
 			completions[url]!.removeFirst()(result)
 		}
 		completions.removeValue(forKey: url)
