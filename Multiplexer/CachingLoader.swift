@@ -38,32 +38,20 @@ public class ImageLoader: CachingLoaderBase<UIImage> {
 #endif
 
 
-/// Used as a generic type for `CachingVideoLoader<>`. Wraps the URL because CachingLoader<> requires the generic to be a class (and that's because of the NSCache interface)
-public class FileURL {
-	let fileURL: URL
-
-	init(fileURL: URL) {
-		self.fileURL = fileURL
-	}
-}
-
-
-/// Asynchronous caching downloader for video, audio or other large media files. Call `request(url:completion:)` or `request(url:progress:completion:)` to retrieve the local file path of the cached object. The result has a type `FileURL` for internal reasons (see comments for FileURL). The media objects themselves are not cached in memory as it is assumed that they will always be streamed from disk. Use the `MediaLoader.main` singleton in your app.
-public class MediaLoader: CachingLoaderBase<FileURL> {
+/// Asynchronous caching downloader for video, audio or other large media files. Call `request(url:completion:)` or `request(url:progress:completion:)` to retrieve the local file path of the cached object. The result is a file URL. The media objects themselves are not cached in memory as it is assumed that they will always be streamed from disk. Use the `MediaLoader.main` singleton in your app.
+public class MediaLoader: CachingLoaderBase<URL> {
 
 	static let main = { MediaLoader() }()
 
 	public override class var cacheFolderName: String { "Videos" }
 
-	public override func prepareMemoryObject(cacheFileURL: URL) -> FileURL? {
-		return FileURL(fileURL: cacheFileURL)
-	}
+	public override func prepareMemoryObject(cacheFileURL: URL) -> URL? { cacheFileURL }
 }
 
 
 /// Protocol that defines what should be overridden in subclasses.
 public protocol CachingLoaderProtocol {
-	associatedtype T: AnyObject
+	associatedtype T
 
 	/// Internal; the last component of the cache path that will be appended to "<cache-folder>/Mux/Files"
 	static var cacheFolderName: String { get }
@@ -78,12 +66,12 @@ let CACHING_LOADER_ERROR_DOMAIN = "MuxCachingLoaderError"
 
 
 /// Internal class that should be subclassed with CachingLoaderProtocol methods overridden.
-public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxRepositoryProtocol {
+public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	/// Instantiates a CachingLoader object with the memory capacity parameter. Internal.
 	public init(memoryCacheCapacity: Int = DEFAULT_MEM_CACHE_CAPACITY) {
-		memCache = CachingDictionary(capacity: memoryCacheCapacity)
+		memCache = LRUCache(capacity: memoryCacheCapacity)
 	}
 
 
@@ -96,7 +84,7 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 
 	public func request(url: URL, progress: ((Int64, Int64) -> Void)?, completion: @escaping OnResult) {
 		// Available in the cache? Return immediately:
-		if let object = memCache[url.absoluteString as NSString] {
+		if let object = memCache.touch(key: url.absoluteString) {
 			completion(.success(object))
 			return
 		}
@@ -104,7 +92,7 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 		// File URL, i.e. it's a local file, no need to queue or download
 		if url.isFileURL {
 			if let object = prepareMemoryObject(cacheFileURL: url) {
-				memCache[url.absoluteString as NSString] = object
+				memCache.set(object, forKey: url.absoluteString)
 				completion(.success(object))
 			}
 			else {
@@ -137,7 +125,7 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 
 	/// Can be called to check whether a given object is available locally or it will be downloaded on next call to `request(...)`
 	public func willRefresh(url: URL) -> Bool {
-		if memCache[url.absoluteString as NSString] != nil {
+		if memCache.has(key: url.absoluteString) {
 			return false
 		}
 		if url.isFileURL {
@@ -150,7 +138,7 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 	/// Discard the objects stored in the memory cache
 	@discardableResult
 	public func clearMemory() -> Self {
-		memCache.clear()
+		memCache.removeAll()
 		return self
 	}
 
@@ -222,13 +210,13 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 		case .success(let cacheFileURL):
 			// Refresh ended successfully: allow the subclass to load the data (or do whatever transformation) that should be stored in the memory cache:
 			if let object = prepareMemoryObject(cacheFileURL: cacheFileURL) {
-				memCache[url.absoluteString as NSString] = object
+				memCache.set(object, forKey: url.absoluteString)
 				complete(url: url, result: .success(object))
 			}
 
 			// The subclass transformation function returned nil: delete the file and signal an app error:
 			else {
-				memCache[url.absoluteString as NSString] = nil
+				memCache.remove(key: url.absoluteString)
 				FileManager.removeRecursively(cacheFileURL)
 				complete(url: url, result: .failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load cache file from disk"])))
 			}
@@ -244,7 +232,7 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 	}
 
 
-	private var memCache: CachingDictionary<NSString, T>
+	private var memCache: LRUCache<String, T>
 
 	private var completions: [URL: [OnResult]] = [:]
 
@@ -254,34 +242,5 @@ public class CachingLoaderBase<T: AnyObject>: CachingLoaderProtocol, MuxReposito
 
 	private func cacheSubdirectory(create: Bool) -> URL {
 		return FileManager.cacheDirectory(subDirectory: "Mux/" + Self.cacheFolderName, create: create)
-	}
-}
-
-
-/// Internal wrapper for the NSCache interface. NSCache is good but it's also thread-safe which is not required here. Might be replaced with something else in the future.
-struct CachingDictionary<K: AnyObject, T: AnyObject> {
-
-	private var cache = NSCache<K, T>()
-
-	init(capacity: Int) {
-		cache.countLimit = capacity
-	}
-
-	subscript(key: K) -> T? {
-		get {
-			return cache.object(forKey: key)
-		}
-		set {
-			if newValue == nil {
-				cache.removeObject(forKey: key)
-			}
-			else {
-				cache.setObject(newValue!, forKey: key)
-			}
-		}
-	}
-
-	func clear() {
-		cache.removeAllObjects()
 	}
 }

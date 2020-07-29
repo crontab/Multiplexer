@@ -20,6 +20,7 @@
 		36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDFF2340CB0100E34B07 /* Zipper.swift */; };
 		36E8FE0C2340CB0100E34B07 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE002340CB0100E34B07 /* Debouncer.swift */; };
 		36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE012340CB0100E34B07 /* FileDownloader.swift */; };
+		36EAB26324D1DAA000956AAD /* LRUCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EAB26224D1DAA000956AAD /* LRUCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		36E8FE002340CB0100E34B07 /* Debouncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
 		36E8FE012340CB0100E34B07 /* FileDownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
 		36E8FE0E2340D32500E34B07 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		36EAB26224D1DAA000956AAD /* LRUCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LRUCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 				36E8FDFC2340CB0100E34B07 /* ErrorEx.swift */,
 				36E8FE012340CB0100E34B07 /* FileDownloader.swift */,
 				36E8FDF62340CB0100E34B07 /* FileManagerEx.swift */,
+				36EAB26224D1DAA000956AAD /* LRUCache.swift */,
 				36E8FDFE2340CB0100E34B07 /* StringEx.swift */,
 				369BE853249A21C100178340 /* ResultEx.swift */,
 				36E8FDDF2340CA0500E34B07 /* Multiplexer.h */,
@@ -180,6 +183,7 @@
 				36E8FE0A2340CB0100E34B07 /* StringEx.swift in Sources */,
 				36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */,
 				36E8FE082340CB0100E34B07 /* ErrorEx.swift in Sources */,
+				36EAB26324D1DAA000956AAD /* LRUCache.swift in Sources */,
 				369BE854249A21C100178340 /* ResultEx.swift in Sources */,
 				36E8FE022340CB0100E34B07 /* FileManagerEx.swift in Sources */,
 				36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */,

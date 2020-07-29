@@ -190,8 +190,8 @@ MediaLoader.main.request(url: URL(string: audioURL)!) { result in
 	switch result {
 	case .failure(let error)
 		print(error)
-	case .success(let object):
-		self.player = AVPlayer(url: object.fileURL)
+	case .success(let fileURL):
+		self.player = AVPlayer(url: fileURL)
 		self.player.play()
 	}
 }

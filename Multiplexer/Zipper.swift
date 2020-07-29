@@ -62,7 +62,7 @@ public class Zipper {
 
 	/// Add a media loader (ImageLoader or MediaLoader) to the zipper. This loader's `request(url:completion:)` will be called as part of the zipper chain.
 	@discardableResult
-	public func add<T: AnyObject>(url: URL, _ mediaLoader: CachingLoaderBase<T>) -> Self {
+	public func add<T>(url: URL, _ mediaLoader: CachingLoaderBase<T>) -> Self {
 		return add(type: T.self) { (onResult) in
 			mediaLoader.request(url: url, completion: onResult)
 		}
