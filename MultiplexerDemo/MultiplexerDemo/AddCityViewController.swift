@@ -12,12 +12,20 @@ import Multiplexer
 
 class AddCityViewController: UITableViewController, UISearchBarDelegate {
 
-	@IBOutlet weak var searchBar: UISearchBar!
+	@IBOutlet private var searchBar: UISearchBar!
 
-	var onLocationSelected: ((Location) -> Void)!
-
+	private var onLocationSelected: ((Location) -> Void)
 	private var results: [Location] = []
 	private var debouncer: DebouncerVar<String>!
+
+
+	init?(coder: NSCoder, onLocationSelected: @escaping ((Location) -> Void)) {
+		self.onLocationSelected = onLocationSelected
+		super.init(coder: coder)
+	}
+
+
+	required init?(coder: NSCoder) { preconditionFailure() }
 
 
 	override func viewDidLoad() {

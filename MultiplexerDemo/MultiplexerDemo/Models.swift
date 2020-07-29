@@ -28,6 +28,7 @@ class Location: Codable {
 class WeatherBlock: Codable {
 	var id: Int
 	var weatherStateName: String	// "Light Rain"
+	var weatherStateAbbr: String	// "lc"
 	var windDirectionCompass: String	// "SSW"
 	var created: Date
 	var applicableDate: String		// "2019-10-03"

@@ -2,6 +2,7 @@
 //  LRUCache.swift
 //
 //  Created by Hovik Melikyan on 31/10/2019.
+//  Copyright © 2019 Hovik Melikyan. All rights reserved.
 //
 
 import Foundation
