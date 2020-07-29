@@ -64,9 +64,7 @@ public class MuxRepository {
 	@objc static func appWillMoveToBackground() {
 		guard !repo.isEmpty else { return }
 		flushAll()
-		#if DEBUG
-			print("Flushing \(repo.count) registered multiplexers")
-		#endif
+		DLOG("Flushing \(repo.count) registered multiplexers")
 	}
 
 	#endif

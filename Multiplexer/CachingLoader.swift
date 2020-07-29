@@ -26,7 +26,7 @@ import Foundation
 /// Asynchronous caching downloader for images. Call `request(url:completion:)` to retrieve the image object or load the cached one. Use the `ImageLoader.main` singleton in your app.
 public class ImageLoader: CachingLoaderBase<UIImage> {
 
-	static let main = { ImageLoader() }()
+	public static let main = { ImageLoader() }()
 
 	public override class var cacheFolderName: String { "Images" }
 
@@ -41,7 +41,7 @@ public class ImageLoader: CachingLoaderBase<UIImage> {
 /// Asynchronous caching downloader for video, audio or other large media files. Call `request(url:completion:)` or `request(url:progress:completion:)` to retrieve the local file path of the cached object. The result is a file URL. The media objects themselves are not cached in memory as it is assumed that they will always be streamed from disk. Use the `MediaLoader.main` singleton in your app.
 public class MediaLoader: CachingLoaderBase<URL> {
 
-	static let main = { MediaLoader() }()
+	public static let main = { MediaLoader() }()
 
 	public override class var cacheFolderName: String { "Videos" }
 
@@ -181,13 +181,13 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 		// Cache file exists? Resolve the queue immediately.
 		if FileManager.exists(cacheFileURL) {
-			// print("CachingLoader: mem cache miss, loading from disk: \(cacheFileURL.lastPathComponent)")
+			DLOG("CachingLoader: mem cache miss, loading from disk: \(cacheFileURL.lastPathComponent)")
 			fetchCompleted(url: url, result: .success(cacheFileURL))
 		}
 
 		// Otherwise start the download:
 		else {
-			// print("CachingLoader: Downloading: \(key)")
+			DLOG("CachingLoader: Downloading: \(url.absoluteString)")
 			FileDownloader(url: url, progress: progress, completion: { (result) in
 				switch result {
 				case .failure(let error):
