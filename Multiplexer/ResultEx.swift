@@ -13,22 +13,18 @@ public extension Result {
 
 	@inlinable
 	var success: Success? {
-		switch self {
-		case .success(let result):
+		if case .success(let result) = self {
 			return result
-		default:
-			return nil
 		}
+		return nil
 	}
 
 	@inlinable
 	var failure: Failure? {
-		switch self {
-		case .failure(let error):
+		if case .failure(let error) = self {
 			return error
-		default:
-			return nil
 		}
+		return nil
 	}
 
 	@inlinable
