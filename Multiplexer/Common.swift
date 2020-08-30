@@ -27,27 +27,27 @@ public func DLOG(_ s: String) {
 
 /// Asynchronously execute a block on the main thread
 @inlinable
-func Async(_ execute: @escaping () -> Void) {
+public func Async(_ execute: @escaping () -> Void) {
 	DispatchQueue.main.async(execute: execute)
 }
 
 
 /// Execute on a new thread with a given QoS
 @inlinable
-func AsyncGlobal(qos: DispatchQoS.QoSClass = .default, _ execute: @escaping () -> Void) {
+public func AsyncGlobal(qos: DispatchQoS.QoSClass = .default, _ execute: @escaping () -> Void) {
 	DispatchQueue.global(qos: qos).async(execute: execute)
 }
 
 
 /// Execute on the main thread with a delay
 @inlinable
-func Async(after: TimeInterval, _ execute: @escaping () -> Void) {
+public func Async(after: TimeInterval, _ execute: @escaping () -> Void) {
 	DispatchQueue.main.asyncAfter(deadline: .now() + after, execute: execute)
 }
 
 
 /// Execute a work item on the main thread with a delay; work item can be cancelled
 @inlinable
-func Async(after: TimeInterval, _ execute: DispatchWorkItem) {
+public func Async(after: TimeInterval, _ execute: DispatchWorkItem) {
 	DispatchQueue.main.asyncAfter(deadline: .now() + after, execute: execute)
 }
