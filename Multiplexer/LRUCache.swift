@@ -10,6 +10,91 @@ import Foundation
 
 public struct LRUCache<K: Hashable, E>: Sequence {
 
+	public private(set) var capacity: Int
+
+	public var count: Int { list.count }
+	public var isEmpty: Bool { list.isEmpty }
+
+	private var list = BubbleList()
+	private var dict = Dictionary<K, BubbleList.Node>()
+
+
+	public init(capacity: Int) {
+		precondition(capacity > 0)
+		self.capacity = capacity
+	}
+
+
+	public mutating func set(_ element: E, forKey key: K) {
+		if let node = dict[key] {
+			node.value = element
+			list.moveToTop(node: node)
+		}
+		else {
+			if list.count == capacity {
+				let key = list.removeBottom().key
+				dict.removeValue(forKey: key)
+			}
+			dict[key] = list.add(key: key, value: element)
+		}
+	}
+
+
+	public mutating func touch(key: K) -> E? {
+		if let node = dict[key] {
+			list.moveToTop(node: node)
+			return node.value
+		}
+		return nil
+	}
+
+
+	@discardableResult
+	public mutating func remove(key: K) -> E? {
+		if let node = dict[key] {
+			list.remove(node: node)
+			dict.removeValue(forKey: key)
+			return node.value
+		}
+		return nil
+	}
+
+
+	public func has(key: K) -> Bool {
+		dict[key] != nil
+	}
+
+
+	public mutating func removeAll() {
+		list.removeAll()
+		dict.removeAll()
+	}
+
+
+	// MARK: - iterator/sequence
+
+	public struct Iterator: IteratorProtocol {
+		public typealias Element = E
+		private var currentNode: BubbleList.Node?
+
+		init(iteree: LRUCache) {
+			currentNode = iteree.list.top
+		}
+
+		public mutating func next() -> E? {
+			defer { currentNode = currentNode?.down }
+			return currentNode?.value
+		}
+	}
+
+
+	public __consuming func makeIterator() -> Iterator {
+		return Iterator(iteree: self)
+	}
+
+
+	// MARK: - linked list, internal
+
 	private struct BubbleList {
 
 		class Node {
@@ -94,85 +179,5 @@ public struct LRUCache<K: Hashable, E>: Sequence {
 			count -= 1
 			return node
 		}
-	}
-
-
-	private(set) var capacity: Int
-
-	public var count: Int { list.count }
-	public var isEmpty: Bool { list.isEmpty }
-
-	private var list = BubbleList()
-	private var dict = Dictionary<K, BubbleList.Node>()
-
-
-	public init(capacity: Int) {
-		precondition(capacity > 0)
-		self.capacity = capacity
-	}
-
-
-	public mutating func set(_ element: E, forKey key: K) {
-		if let node = dict[key] {
-			node.value = element
-			list.moveToTop(node: node)
-		}
-		else {
-			if list.count == capacity {
-				let key = list.removeBottom().key
-				dict.removeValue(forKey: key)
-			}
-			dict[key] = list.add(key: key, value: element)
-		}
-	}
-
-
-	public mutating func touch(key: K) -> E? {
-		if let node = dict[key] {
-			list.moveToTop(node: node)
-			return node.value
-		}
-		return nil
-	}
-
-
-	public mutating func remove(key: K) {
-		if let node = dict[key] {
-			list.remove(node: node)
-			dict.removeValue(forKey: key)
-		}
-	}
-
-
-	public func has(key: K) -> Bool {
-		dict[key] != nil
-	}
-
-
-	public mutating func removeAll() {
-		list.removeAll()
-		dict.removeAll()
-	}
-
-
-	// MARK: - iterator/sequence
-
-	public struct Iterator: IteratorProtocol {
-		public typealias Element = E
-		private var currentNode: BubbleList.Node?
-
-		init(iteree: LRUCache) {
-			currentNode = iteree.list.top
-		}
-
-		public mutating func next() -> E? {
-			defer { currentNode = currentNode?.down }
-			return currentNode?.value
-		}
-	}
-
-
-	public __consuming func makeIterator() -> Iterator {
-		return Iterator(iteree: self)
 	}
 }
