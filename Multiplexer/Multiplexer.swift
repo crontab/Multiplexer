@@ -129,8 +129,8 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 
 	/// "Soft" refresh: the next call to `request(completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh()` does not have an immediate effect on any ongoing asynchronous requests.
 	@discardableResult
-	public func refresh() -> Self {
-		refreshFlag = true
+	public func refresh(_ flag: Bool = true) -> Self {
+		refreshFlag = flag
 		return self
 	}
 
