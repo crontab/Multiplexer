@@ -83,7 +83,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	/// - parameter onFetch: this block should retrieve an object, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
 
-	init(onFetch: @escaping (@escaping OnResult) -> Void) {
+	public init(onFetch: @escaping (@escaping OnResult) -> Void) {
 		self.onFetch = onFetch
 	}
 
