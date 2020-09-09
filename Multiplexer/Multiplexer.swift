@@ -24,7 +24,7 @@ public var MuxDefaultTTL: TimeInterval = 30 * 60
 public class MultiplexFetcher<T: Codable> {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
-	private var completions: [OnResult] = []
+	private var completions: [OnResult?] = []
 	private var completionTime: TimeInterval = 0
 
 	internal private(set) var previousValue: T? {
@@ -40,7 +40,7 @@ public class MultiplexFetcher<T: Codable> {
 	}
 
 
-	internal func append(completion: @escaping OnResult) -> Bool {
+	internal func append(completion: OnResult?) -> Bool {
 		completions.append(completion)
 		return completions.count > 1
 	}
@@ -61,7 +61,7 @@ public class MultiplexFetcher<T: Codable> {
 		}
 
 		while !completions.isEmpty {
-			completions.removeFirst()(result)
+			completions.removeFirst()?(result)
 		}
 	}
 
@@ -92,11 +92,11 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	public func request(completion: @escaping OnResult) {
+	public func request(completion: OnResult?) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
 		if !refreshFlag, let previousValue = previousValue, !isExpired(ttl: Self.timeToLive) {
-			completion(.success(previousValue))
+			completion?(.success(previousValue))
 			return
 		}
 

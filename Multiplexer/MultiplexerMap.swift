@@ -36,12 +36,12 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	public func request(key: K, completion: @escaping OnResult) {
+	public func request(key: K, completion: OnResult?) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
 		if !fetcher.refreshFlag, let previousValue = fetcher.previousValue, !fetcher.isExpired(ttl: Self.timeToLive) {
-			completion(.success(previousValue))
+			completion?(.success(previousValue))
 			return
 		}
 
