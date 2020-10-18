@@ -51,6 +51,7 @@ public class MuxRepository {
 	/// If set to `true`, automatically calls `flushAll()` each time the app is sent to background. `flushAll()` ensures only "dirty" objects are written to disk, i.e. those that haven't been written yet.
 	public static var automaticFlush: Bool = false {
 		didSet {
+			guard oldValue != automaticFlush else { return }
 			let center = NotificationCenter.default
 			if automaticFlush {
 				center.addObserver(self, selector: #selector(appWillMoveToBackground), name: UIApplication.willResignActiveNotification, object: nil)
@@ -75,6 +76,7 @@ public class MuxRepository {
 	private static var repo: [ObjectIdentifier: MuxRepositoryProtocol] = [:]
 
 	fileprivate static func register(mux: MuxRepositoryProtocol) {
+		DLOG("Registering multiplexer \(String(describing: mux.self))")
 		let id = ObjectIdentifier(mux)
 		precondition(repo[id] == nil, "MuxRepository: duplicate registration")
 		repo[id] = mux
