@@ -11,6 +11,10 @@ import Foundation
 
 public extension String {
 
+	func words() -> [String] {
+		return components(separatedBy: CharacterSet.whitespacesAndNewlines).filter({ !$0.isEmpty })
+	}
+
 	func toURLSafeHash(max: Int) -> String {
 		return String(toSHA256().toURLSafeBase64().suffix(max))
 	}
