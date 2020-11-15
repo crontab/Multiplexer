@@ -11,14 +11,14 @@ import Foundation
 
 public class FileDownloader: NSObject, URLSessionDownloadDelegate {
 
-	typealias Progress = (Int64, Int64) -> Void
-	typealias Completion = (Result<URL, Error>) -> Void
+	public typealias Progress = (Int64, Int64) -> Void
+	public typealias Completion = (Result<URL, Error>) -> Void
 
 	private var progress: Progress?
 	private var completion: Completion
 	private var task: URLSessionDownloadTask!
 
-	init(url: URL, progress: Progress?, completion: @escaping Completion) {
+	public required init(url: URL, progress: Progress?, completion: @escaping Completion) {
 		self.progress = progress
 		self.completion = completion
 		super.init()
@@ -26,11 +26,11 @@ public class FileDownloader: NSObject, URLSessionDownloadDelegate {
 		self.task = session.downloadTask(with: url)
 	}
 
-	func resume() {
+	public func resume() {
 		task.resume()
 	}
 
-	func cancel() {
+	public func cancel() {
 		// Triggers NSURLErrorDomain.NSURLErrorCancelled
 		task.cancel()
 	}
