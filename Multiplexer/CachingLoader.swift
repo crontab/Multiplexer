@@ -30,8 +30,21 @@ public class ImageLoader: CachingLoaderBase<UIImage> {
 
 	public override class var cacheFolderName: String { "Images" }
 
-	public override func prepareMemoryObject(cacheFileURL: URL) -> UIImage? {
-		return UIImage(contentsOfFile: cacheFileURL.path)
+	private static let ioQueue = DispatchQueue(label: "com.elevenlife.CachingImageLoader", qos: .background)
+
+	public override func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (UIImage?) -> Void) {
+		Self.ioQueue.async {
+			let image = UIImage(contentsOfFile: cacheFileURL.path)
+			if let image = image {
+				// Make sure the image is decompressed on the background thread
+				UIGraphicsBeginImageContext(image.size)
+				image.draw(at: .zero)
+				UIGraphicsEndImageContext()
+			}
+			Async {
+				completion(image)
+			}
+		}
 	}
 }
 
@@ -43,9 +56,11 @@ public class MediaLoader: CachingLoaderBase<URL> {
 
 	public static let main = { MediaLoader() }()
 
-	public override class var cacheFolderName: String { "Videos" }
+	public override class var cacheFolderName: String { "Media" }
 
-	public override func prepareMemoryObject(cacheFileURL: URL) -> URL? { cacheFileURL }
+	public override func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (URL?) -> Void) {
+		completion(cacheFileURL)
+	}
 }
 
 
@@ -57,7 +72,7 @@ public protocol CachingLoaderProtocol {
 	static var cacheFolderName: String { get }
 
 	/// Internal; can return the object, e.g. UIImage, or the file path itself e.g. for media files that will be streamed directly from file, for example video. Return nil if you want to indicate the file is damaged and should be deleted. Otherwise the resulting object will be stored in memory cache.
-	func prepareMemoryObject(cacheFileURL: URL) -> T?
+	func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (T?) -> Void)
 }
 
 
@@ -91,12 +106,14 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 		// File URL, i.e. it's a local file, no need to queue or download
 		if url.isFileURL {
-			if let object = prepareMemoryObject(cacheFileURL: url) {
-				memCache.set(object, forKey: url.absoluteString)
-				completion(.success(object))
-			}
-			else {
-				completion(.failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load file from disk"])))
+			prepareMemoryObject(cacheFileURL: url) { (result) in
+				if let object = result {
+					self.memCache.set(object, forKey: url.absoluteString)
+					completion(.success(object))
+				}
+				else {
+					completion(.failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load file from disk"])))
+				}
 			}
 			return
 		}
@@ -171,7 +188,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	}
 
 
-	public func prepareMemoryObject(cacheFileURL: URL) -> T? {
+	public func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (T?) -> Void) {
 		preconditionFailure()
 	}
 
@@ -209,16 +226,17 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 		case .success(let cacheFileURL):
 			// Refresh ended successfully: allow the subclass to load the data (or do whatever transformation) that should be stored in the memory cache:
-			if let object = prepareMemoryObject(cacheFileURL: cacheFileURL) {
-				memCache.set(object, forKey: url.absoluteString)
-				complete(url: url, result: .success(object))
-			}
-
-			// The subclass transformation function returned nil: delete the file and signal an app error:
-			else {
-				memCache.remove(key: url.absoluteString)
-				FileManager.removeRecursively(cacheFileURL)
-				complete(url: url, result: .failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load cache file from disk"])))
+			prepareMemoryObject(cacheFileURL: cacheFileURL) { (result) in
+				if let object = result {
+					self.memCache.set(object, forKey: url.absoluteString)
+					self.complete(url: url, result: .success(object))
+				}
+				else {
+					// The subclass transformation function returned nil: delete the file and signal an app error:
+					self.memCache.remove(key: url.absoluteString)
+					FileManager.removeRecursively(cacheFileURL)
+					self.complete(url: url, result: .failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load cache file from disk"])))
+				}
 			}
 		}
 	}
