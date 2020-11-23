@@ -164,7 +164,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	@discardableResult
 	public func clearCache() -> Self {
 		// NOTE: clearCache() should never be called from within a completion handler (I don't remember why, but believe me it's bad)
-		FileManager.removeRecursively(cacheSubdirectory(create: false))
+		FileManager.remove(cacheSubdirectory(create: false))
 		return self
 	}
 
@@ -234,7 +234,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 				else {
 					// The subclass transformation function returned nil: delete the file and signal an app error:
 					self.memCache.remove(key: url.absoluteString)
-					FileManager.removeRecursively(cacheFileURL)
+					FileManager.remove(cacheFileURL)
 					self.complete(url: url, result: .failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load cache file from disk"])))
 				}
 			}

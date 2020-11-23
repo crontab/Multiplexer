@@ -46,11 +46,11 @@ public final class JSONDiskCacher<K: MuxKey, T: Codable>: Cacher {
 	}
 
 	public static func clearCache<K: MuxKey>(key: K, domain: String?) {
-		FileManager.removeRecursively(cacheFileURL(key: key, domain: domain, create: false))
+		FileManager.remove(cacheFileURL(key: key, domain: domain, create: false))
 	}
 
 	public static func clearCacheMap(domain: String) {
-		FileManager.removeRecursively(cacheDirURL(domain: domain, create: false))
+		FileManager.remove(cacheDirURL(domain: domain, create: false))
 	}
 
 	private static func cacheFileURL<K: MuxKey>(key: K, domain: String?, create: Bool) -> URL {
