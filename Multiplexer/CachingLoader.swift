@@ -259,6 +259,6 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	}
 
 	private func cacheSubdirectory(create: Bool) -> URL {
-		return FileManager.cacheDirectory(subDirectory: "Mux/" + Self.cacheFolderName, create: create)
+		return FileManager.cachesDirectory(subDirectory: "Mux/" + Self.cacheFolderName, create: create)
 	}
 }
