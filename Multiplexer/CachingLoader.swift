@@ -94,25 +94,27 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	/// Retrieves a media object from the given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported by this interface as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
 	/// - parameter url: remote (non-file) URL of the media object to be retrieved.
 	/// - parameter progress: on optional callback to report downloading progress to the user; provides the number of bytes received and the total number of bytes to be downloaded in regular intervals
-	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`
+	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`. If `completion` is nil, the object is downloaded (if required) but not expanded in memory; this can be useful for e.g. prefetching images without uncompressing them at program startup.
 	///
 
-	public func request(url: URL, progress: ((Int64, Int64) -> Void)?, completion: @escaping OnResult) {
+	public func request(url: URL, progress: ((Int64, Int64) -> Void)?, completion: OnResult?) {
 		// Available in the cache? Return immediately:
 		if let object = memCache.touch(key: url.absoluteString) {
-			completion(.success(object))
+			completion?(.success(object))
 			return
 		}
 
 		// File URL, i.e. it's a local file, no need to queue or download
 		if url.isFileURL {
-			prepareMemoryObject(cacheFileURL: url) { (result) in
-				if let object = result {
-					self.memCache.set(object, forKey: url.absoluteString)
-					completion(.success(object))
-				}
-				else {
-					completion(.failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load file from disk"])))
+			if let completion = completion {
+				prepareMemoryObject(cacheFileURL: url) { (result) in
+					if let object = result {
+						self.memCache.set(object, forKey: url.absoluteString)
+						completion(.success(object))
+					}
+					else {
+						completion(.failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to load file from disk"])))
+					}
 				}
 			}
 			return
@@ -132,10 +134,10 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	///
 	/// Convenience alias to `request(url:progress:completion:)`. Retrieves a media object from the given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. There is no expiration in this case unlike the Multiplexer family of interfaces. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported by this interface as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
 	/// - parameter url: remote (non-file) URL of the media object to be retrieved.
-	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`
+	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`. If `completion` is nil, the object is downloaded (if required) but not expanded in memory; this can be useful for e.g. prefetching images without uncompressing them at program startup.
 	///
 
-	public func request(url: URL, completion: @escaping OnResult) {
+	public func request(url: URL, completion: OnResult?) {
 		request(url: url, progress: nil, completion: completion)
 	}
 
@@ -225,7 +227,13 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 			complete(url: url, result: .failure(error))
 
 		case .success(let cacheFileURL):
-			// Refresh ended successfully: allow the subclass to load the data (or do whatever transformation) that should be stored in the memory cache:
+			// Refresh ended successfully: allow the subclass to load the data (or do whatever transformation) that should be stored in the memory cache. Before that, check if all completion blocks are empty, i.e. no need to transform the object.
+
+			if completions[url]?.firstIndex(where: { $0 != nil }) == nil {
+				completions.removeValue(forKey: url)
+				return
+			}
+
 			prepareMemoryObject(cacheFileURL: cacheFileURL) { (result) in
 				if let object = result {
 					self.memCache.set(object, forKey: url.absoluteString)
@@ -244,7 +252,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 	private func complete(url: URL, result: Result<T, Error>) {
 		while !(completions[url]?.isEmpty ?? true) {
-			completions[url]!.removeFirst()(result)
+			completions[url]!.removeFirst()?(result)
 		}
 		completions.removeValue(forKey: url)
 	}
@@ -252,7 +260,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 	private var memCache: LRUCache<String, T>
 
-	private var completions: [URL: [OnResult]] = [:]
+	private var completions: [URL: [OnResult?]] = [:]
 
 	private func cacheFileURLFor(url: URL, create: Bool) -> URL {
 		return cacheSubdirectory(create: create).appendingPathComponent(url.absoluteString.toURLSafeHash(max: 32)).appendingPathExtension(url.pathExtension)

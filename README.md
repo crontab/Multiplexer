@@ -175,6 +175,8 @@ More detailed descriptions on each method can be found in the source file [Multi
 
 Both interfaces provide singleton objects called `main` that should be used in your app.
 
+The `request(url:completion:)` and `request(url:progress:completion:)` methods can be called with `completion` set to `nil`, in which case the object is downloaded (if required) but not expanded in memory; this can be useful for e.g. prefetching images without uncompressing them at program startup.
+
 Examples:
 
 ```swift
