@@ -30,7 +30,7 @@ public class ImageLoader: CachingLoaderBase<UIImage> {
 
 	public override class var cacheFolderName: String { "Images" }
 
-	private static let ioQueue = DispatchQueue(label: "com.elevenlife.CachingImageLoader", qos: .background)
+	private static let ioQueue = DispatchQueue(label: "com.melikyan.CachingImageLoader", qos: .background)
 
 	public override func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (UIImage?) -> Void) {
 		Self.ioQueue.async {
