@@ -27,10 +27,6 @@ public class MultiplexFetcher<T: Codable> {
 	private var completions: [OnResult?] = []
 	private var completionTime: TimeInterval = 0
 
-	internal private(set) var previousValue: T? {
-		didSet { isDirty = previousValue != nil }
-	}
-
 	internal var isDirty: Bool = false
 	internal var refreshFlag: Bool = false
 
@@ -54,7 +50,7 @@ public class MultiplexFetcher<T: Codable> {
 			if let completionTime = completionTime {
 				self.completionTime = completionTime
 			}
-			previousValue = value
+			storedValue = value
 
 		case .failure:
 			clearMemory()
@@ -66,10 +62,17 @@ public class MultiplexFetcher<T: Codable> {
 	}
 
 
+	/// Last good value returned by the fetcher; can be used in situations where requesting the result via a callback is not feasible or practical and an optimistic assumption can be made that the result is likely already available. Use with care.
+	public private(set) var storedValue: T? {
+		didSet { isDirty = storedValue != nil }
+	}
+
+
+	/// Clears the last fetched result stored in memory; doesn't affect the disk-cached one. Can be used in low memory situations. Will trigger a full fetch on the next `request(completion:)` call.
 	@discardableResult
 	public func clearMemory() -> Self {
 		completionTime = 0
-		previousValue = nil
+		storedValue = nil
 		return self
 	}
 }
@@ -95,8 +98,8 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	public func request(completion: OnResult?) {
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !refreshFlag, let previousValue = previousValue, !isExpired(ttl: Self.timeToLive) {
-			completion?(.success(previousValue))
+		if !refreshFlag, let storedValue = storedValue, !isExpired(ttl: Self.timeToLive) {
+			completion?(.success(storedValue))
 			return
 		}
 
@@ -115,7 +118,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 				self.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = self.previousValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
+				if Self.useCachedResultOn(error: error), let cachedValue = self.storedValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					self.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -135,7 +138,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	}
 
 
-	/// Discards the memory and disk caches for the given object
+	/// Clears the memory and disk caches. Will trigger a full fetch on the next `request(completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
 		C.clearCache(key: Self.cacheKey, domain: nil)
@@ -146,8 +149,8 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	/// Writes the previously cached object to disk using the default cacher interface. For the `Multiplexer` class the default cacher is `JSONDiskCacher`.
 	@discardableResult
 	public func flush() -> Self {
-		if isDirty, let previousValue = previousValue {
-			C.saveToCache(previousValue, key: Self.cacheKey, domain: nil)
+		if isDirty, let storedValue = storedValue {
+			C.saveToCache(storedValue, key: Self.cacheKey, domain: nil)
 			isDirty = false
 		}
 		return self

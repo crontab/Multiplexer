@@ -40,8 +40,8 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !fetcher.refreshFlag, let previousValue = fetcher.previousValue, !fetcher.isExpired(ttl: Self.timeToLive) {
-			completion?(.success(previousValue))
+		if !fetcher.refreshFlag, let storedValue = fetcher.storedValue, !fetcher.isExpired(ttl: Self.timeToLive) {
+			completion?(.success(storedValue))
 			return
 		}
 
@@ -60,7 +60,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 				fetcher.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
+				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -80,6 +80,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
+	/// Clears the last fetched result for a given `key` stored in memory; doesn't affect the disk-cached value. Can be used in low memory situations. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clearMemory(key: K) -> Self {
 		fetcherMap.removeValue(forKey: key)
@@ -87,6 +88,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
+	/// Clears the last fetched results for all keys stored in memory; doesn't affect the disk-cached values. Can be used in low memory situations. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clearMemory() -> Self {
 		fetcherMap = [:]
@@ -94,6 +96,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
+	/// Clears the cached value for a given `key` in memory and on disk. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear(key: K) -> Self {
 		C.clearCache(key: key, domain: Self.cacheDomain)
@@ -101,7 +104,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
-	/// Discard the memory and disk caches for the objects
+	/// Clears the memory and disk caches for all keys. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
 		C.clearCacheMap(domain: Self.cacheDomain)
@@ -113,8 +116,8 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	@discardableResult
 	public func flush() -> Self {
 		fetcherMap.forEach { (key, fetcher) in
-			if fetcher.isDirty, let previousValue = fetcher.previousValue {
-				C.saveToCache(previousValue, key: key, domain: Self.cacheDomain)
+			if fetcher.isDirty, let storedValue = fetcher.storedValue {
+				C.saveToCache(storedValue, key: key, domain: Self.cacheDomain)
 				fetcher.isDirty = false
 			}
 		}

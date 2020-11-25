@@ -91,7 +91,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 
 	///
-	/// Retrieves a media object from the given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported by this interface as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
+	/// Retrieves a media object from a given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported by this interface as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
 	/// - parameter url: remote (non-file) URL of the media object to be retrieved.
 	/// - parameter progress: on optional callback to report downloading progress to the user; provides the number of bytes received and the total number of bytes to be downloaded in regular intervals
 	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`. If `completion` is nil, the object is downloaded (if required) but not expanded in memory; this can be useful for e.g. prefetching images without uncompressing them at program startup.
@@ -132,7 +132,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 
 	///
-	/// Convenience alias to `request(url:progress:completion:)`. Retrieves a media object from the given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. There is no expiration in this case unlike the Multiplexer family of interfaces. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported by this interface as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
+	/// Convenience alias to `request(url:progress:completion:)`. Retrieves a media object from a given URL. When called for the first time, this method initiates an actual download; subsequent (or parallel) calls will return the cached object. There is no expiration in this case unlike the Multiplexer family of interfaces. Up to a certain number of objects can be kept in memory for faster access. Soft refresh is not supported by this interface as it is assumed media objects are immutable, i.e. once downloaded from a given URL the object can be kept locally indefinitely.
 	/// - parameter url: remote (non-file) URL of the media object to be retrieved.
 	/// - parameter completion: user's callback function for receiving the result as `Result<T, Error>`. If `completion` is nil, the object is downloaded (if required) but not expanded in memory; this can be useful for e.g. prefetching images without uncompressing them at program startup.
 	///
