@@ -212,8 +212,13 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 				case .failure(let error):
 					self.fetchCompleted(url: url, result: .failure(error))
 				case .success(let tempURL):
-					try! FileManager.default.moveItem(at: tempURL, to: cacheFileURL)
-					self.fetchCompleted(url: url, result: .success(cacheFileURL))
+					do {
+						try FileManager.default.moveItem(at: tempURL, to: cacheFileURL)
+						self.fetchCompleted(url: url, result: .success(cacheFileURL))
+					}
+					catch {
+						self.fetchCompleted(url: url, result: .failure(NSError(domain: CACHING_LOADER_ERROR_DOMAIN, code: 2, userInfo: [NSLocalizedDescriptionKey: "File download failed"])))
+					}
 				}
 			}).resume()
 		}
