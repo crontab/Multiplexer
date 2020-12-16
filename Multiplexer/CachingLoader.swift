@@ -200,7 +200,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 		// Cache file exists? Resolve the queue immediately.
 		if FileManager.exists(cacheFileURL) {
-			DLOG("CachingLoader: mem cache miss, loading from disk: \(cacheFileURL.lastPathComponent)")
+			DLOG("CachingLoader: mem cache miss, found on disk: \(cacheFileURL.lastPathComponent)")
 			fetchCompleted(url: url, result: .success(cacheFileURL))
 		}
 
@@ -233,6 +233,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 		case .success(let cacheFileURL):
 			// Refresh ended successfully: allow the subclass to load the data (or do whatever transformation) that should be stored in the memory cache. Before that, check if all completion blocks are empty, i.e. no need to transform the object.
+			// Note that this will not load the object into the mem cache. If you want it to be loaded, call `request()` with a non-nil completion handler.
 
 			if completions[url]?.firstIndex(where: { $0 != nil }) == nil {
 				completions.removeValue(forKey: url)
