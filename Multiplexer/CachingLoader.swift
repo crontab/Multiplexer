@@ -28,7 +28,7 @@ public class ImageLoader: CachingLoaderBase<UIImage> {
 
 	public static let main = { ImageLoader() }()
 
-	public override class var cacheFolderName: String { "Images" }
+	public override var cacheID: String { "Images" }
 
 	private static let ioQueue = DispatchQueue(label: "com.melikyan.CachingImageLoader", qos: .background)
 
@@ -56,7 +56,7 @@ public class MediaLoader: CachingLoaderBase<URL> {
 
 	public static let main = { MediaLoader() }()
 
-	public override class var cacheFolderName: String { "Media" }
+	public override var cacheID: String { "Media" }
 
 	public override func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (URL?) -> Void) {
 		completion(cacheFileURL)
@@ -67,9 +67,6 @@ public class MediaLoader: CachingLoaderBase<URL> {
 /// Protocol that defines what should be overridden in subclasses.
 public protocol CachingLoaderProtocol {
 	associatedtype T
-
-	/// Internal; the last component of the cache path that will be appended to "<cache-folder>/Mux/Files"
-	static var cacheFolderName: String { get }
 
 	/// Internal; can return the object, e.g. UIImage, or the file path itself e.g. for media files that will be streamed directly from file, for example video. Return nil if you want to indicate the file is damaged and should be deleted. Otherwise the resulting object will be stored in memory cache.
 	func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (T?) -> Void)
@@ -185,7 +182,7 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	}
 
 
-	public class var cacheFolderName: String {
+	public var cacheID: String {
 		preconditionFailure()
 	}
 
@@ -273,6 +270,6 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	}
 
 	private func cacheSubdirectory(create: Bool) -> URL {
-		return FileManager.cachesDirectory(subDirectory: "Mux/" + Self.cacheFolderName, create: create)
+		return FileManager.cachesDirectory(subDirectory: "Mux/" + cacheID, create: create)
 	}
 }

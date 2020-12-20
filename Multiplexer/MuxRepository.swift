@@ -22,6 +22,8 @@ public protocol MuxRepositoryProtocol: class {
 
 	@discardableResult
 	func clear() -> Self // clear all memory and disk caches
+
+	var cacheID: String { get }
 }
 
 
@@ -73,18 +75,17 @@ public class MuxRepository {
 
 	// - - -
 
-	private static var repo: [ObjectIdentifier: MuxRepositoryProtocol] = [:]
+	private static var repo: [String: MuxRepositoryProtocol] = [:]
 
 	fileprivate static func register(mux: MuxRepositoryProtocol) {
 		DLOG("Registering multiplexer \(String(describing: mux.self))")
-		let id = ObjectIdentifier(mux)
+		let id = mux.cacheID
 		precondition(repo[id] == nil, "MuxRepository: duplicate registration")
 		repo[id] = mux
 	}
 
 	fileprivate static func unregister(mux: MuxRepositoryProtocol) {
-		let id = ObjectIdentifier(mux)
-		repo.removeValue(forKey: id)
+		repo.removeValue(forKey: mux.cacheID)
 	}
 }
 

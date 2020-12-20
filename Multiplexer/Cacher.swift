@@ -58,7 +58,7 @@ public final class JSONDiskCacher<K: MuxKey, T: Codable>: Cacher {
 	}
 
 	private static func cacheDirURL(domain: String?, create: Bool) -> URL {
-		let dir = "Mux/" + (domain != nil ? domain! + ".Map" : "")
+		let dir = "Mux/" + (domain ?? "")
 		return FileManager.cachesDirectory(subDirectory: dir, create: create)
 	}
 }

@@ -60,7 +60,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 				fetcher.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
+				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? C.loadFromCache(key: key, domain: self.cacheID) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -99,7 +99,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	/// Clears the cached value for a given `key` in memory and on disk. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear(key: K) -> Self {
-		C.clearCache(key: key, domain: Self.cacheDomain)
+		C.clearCache(key: key, domain: cacheID)
 		return clearMemory(key: key)
 	}
 
@@ -107,7 +107,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	/// Clears the memory and disk caches for all keys. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
-		C.clearCacheMap(domain: Self.cacheDomain)
+		C.clearCacheMap(domain: cacheID)
 		return clearMemory()
 	}
 
@@ -117,7 +117,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	public func flush() -> Self {
 		fetcherMap.forEach { (key, fetcher) in
 			if fetcher.isDirty, let storedValue = fetcher.storedValue {
-				C.saveToCache(storedValue, key: key, domain: Self.cacheDomain)
+				C.saveToCache(storedValue, key: key, domain: cacheID)
 				fetcher.isDirty = false
 			}
 		}
@@ -134,7 +134,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the directory name on disk in the local cache directory. Each object iss stored in the directory as a JSON file with the object ID as a file name, plus the `.json` extension. For DB-based cachers `cacheDomain` can be the table name. By default returns the object class name, e.g. for `MultiplexerMap<UserProfile>` the cache directory name will be "UserProfile.Map" in the cache directory.
-	public class var cacheDomain: String { String(describing: T.self) }
+	public var cacheID: String { String(describing: T.self) + ".Map" }
 
 
 	private typealias Fetcher = MultiplexFetcher<T>

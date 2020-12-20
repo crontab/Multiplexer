@@ -118,7 +118,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 				self.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = self.storedValue ?? C.loadFromCache(key: Self.cacheKey, domain: nil) {
+				if Self.useCachedResultOn(error: error), let cachedValue = self.storedValue ?? C.loadFromCache(key: self.cacheID, domain: nil) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					self.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -141,7 +141,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	/// Clears the memory and disk caches. Will trigger a full fetch on the next `request(completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
-		C.clearCache(key: Self.cacheKey, domain: nil)
+		C.clearCache(key: cacheID, domain: nil)
 		return clearMemory()
 	}
 
@@ -150,7 +150,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	@discardableResult
 	public func flush() -> Self {
 		if isDirty, let storedValue = storedValue {
-			C.saveToCache(storedValue, key: Self.cacheKey, domain: nil)
+			C.saveToCache(storedValue, key: cacheID, domain: nil)
 			isDirty = false
 		}
 		return self
@@ -166,7 +166,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.
-	public class var cacheKey: String { String(describing: T.self) }
+	public var cacheID: String { String(describing: T.self) }
 
 
 	private let onFetch: (@escaping OnResult) -> Void
