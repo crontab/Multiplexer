@@ -26,8 +26,13 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	/// - parameter onKeyFetch: this block should retrieve an object by its ID, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
 
-	public init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
+	public convenience init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
+		self.init(cacheID: String(describing: T.self), onKeyFetch: onKeyFetch)
+	}
+
+	public init(cacheID: String, onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
 		self.onKeyFetch = onKeyFetch
+		self.cacheID = cacheID + ".Map"
 	}
 
 	///
@@ -134,7 +139,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the directory name on disk in the local cache directory. Each object iss stored in the directory as a JSON file with the object ID as a file name, plus the `.json` extension. For DB-based cachers `cacheDomain` can be the table name. By default returns the object class name, e.g. for `MultiplexerMap<UserProfile>` the cache directory name will be "UserProfile.Map" in the cache directory.
-	public var cacheID: String { String(describing: T.self) + ".Map" }
+	public var cacheID: String
 
 
 	private typealias Fetcher = MultiplexFetcher<T>

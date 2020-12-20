@@ -80,7 +80,7 @@ public class MuxRepository {
 	fileprivate static func register(mux: MuxRepositoryProtocol) {
 		DLOG("Registering multiplexer \(String(describing: mux.self))")
 		let id = mux.cacheID
-		precondition(repo[id] == nil, "MuxRepository: duplicate registration")
+		precondition(repo[id] == nil, "MuxRepository: duplicate registration (ID: \(id))")
 		repo[id] = mux
 	}
 

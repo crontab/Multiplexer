@@ -86,8 +86,13 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 	/// - parameter onFetch: this block should retrieve an object, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
 
-	public init(onFetch: @escaping (@escaping OnResult) -> Void) {
+	public convenience init(onFetch: @escaping (@escaping OnResult) -> Void) {
+		self.init(cacheID: String(describing: T.self), onFetch: onFetch)
+	}
+
+	public init(cacheID: String, onFetch: @escaping (@escaping OnResult) -> Void) {
 		self.onFetch = onFetch
+		self.cacheID = cacheID
 	}
 
 	///
@@ -166,7 +171,7 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.
-	public var cacheID: String { String(describing: T.self) }
+	public var cacheID: String
 
 
 	private let onFetch: (@escaping OnResult) -> Void
