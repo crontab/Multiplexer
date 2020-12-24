@@ -21,7 +21,7 @@ public var MuxDefaultTTL: TimeInterval = 30 * 60
 
 
 /// Internal class that's reused in `MultiplexerBase` and `MultiplexerMapBase`
-public class MultiplexFetcher<T: Codable> {
+open class MultiplexFetcher<T: Codable> {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	private var completions: [OnResult?] = []
@@ -79,7 +79,7 @@ public class MultiplexFetcher<T: Codable> {
 
 
 /// Multiplexer base class that can be combined with a static `Cacher` implementation in a typealias.
-public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepositoryProtocol {
+open class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 
 	///
 	/// Instantiates a `Multiplexer<T>` object with a given `onFetch` block. It's important to ensure that for each given singular object there is only one Multiplexer singleton in the app.
@@ -163,15 +163,15 @@ public class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRep
 
 
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onFetch`. The time-to-live parameter will be ignored if this method returns `true`.
-	public class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+	open class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
 
 	/// Determines when the Multiplexer should attempt to fetch a fresh copy of the object again. Applies to the memory cache only. Defaults to 30 minutes.
-	public class var timeToLive: TimeInterval { MuxDefaultTTL }
+	open class var timeToLive: TimeInterval { MuxDefaultTTL }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.
-	public var cacheID: String
+	open var cacheID: String
 
 
 	private let onFetch: (@escaping OnResult) -> Void

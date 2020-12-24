@@ -18,7 +18,7 @@ public typealias MultiplexerMap<K: MuxKey, T: Codable> = MultiplexerMapBase<K, T
 
 
 /// MultiplexerMap base class that can be combined with a static `Cacher` implementation in a typealias.
-public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryProtocol {
+open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryProtocol {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	///
@@ -131,15 +131,15 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 
 
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onKeyFetch`. The time-to-live parameter will be ignored if this method returns `true`.
-	public class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+	open class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
 
 	/// Determines when the Multiplexer should attempt to fetch a fresh copy of the object again. Applies to the memory cache only. Defaults to 30 minutes.
-	public class var timeToLive: TimeInterval { MuxDefaultTTL }
+	open class var timeToLive: TimeInterval { MuxDefaultTTL }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the directory name on disk in the local cache directory. Each object iss stored in the directory as a JSON file with the object ID as a file name, plus the `.json` extension. For DB-based cachers `cacheDomain` can be the table name. By default returns the object class name, e.g. for `MultiplexerMap<UserProfile>` the cache directory name will be "UserProfile.Map" in the cache directory.
-	public var cacheID: String
+	open var cacheID: String
 
 
 	private typealias Fetcher = MultiplexFetcher<T>
