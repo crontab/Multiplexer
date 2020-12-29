@@ -14,11 +14,8 @@ import Foundation
 /// See README.md for a more detailed discussion.
 ///
 
-public typealias MultiplexerMap<K: MuxKey, T: Codable> = MultiplexerMapBase<K, T, JSONDiskCacher<K, T>>
-
-
 /// MultiplexerMap base class that can be combined with a static `Cacher` implementation in a typealias.
-open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryProtocol {
+open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	///
@@ -31,6 +28,7 @@ open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryPr
 	}
 
 	public init(cacheID: String, onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
+		self.cacher = JSONDiskCacher<K, T>() // hardcoded for now
 		self.onKeyFetch = onKeyFetch
 		self.cacheID = cacheID + ".Map"
 	}
@@ -65,7 +63,7 @@ open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryPr
 				fetcher.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? C.loadFromCache(key: key, domain: self.cacheID) {
+				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? self.cacher.loadFromCache(key: key, domain: self.cacheID) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -104,7 +102,7 @@ open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryPr
 	/// Clears the cached value for a given `key` in memory and on disk. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear(key: K) -> Self {
-		C.clearCache(key: key, domain: cacheID)
+		cacher.clearCache(key: key, domain: cacheID)
 		return clearMemory(key: key)
 	}
 
@@ -112,7 +110,7 @@ open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryPr
 	/// Clears the memory and disk caches for all keys. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
-		C.clearCacheMap(domain: cacheID)
+		cacher.clearCacheMap(domain: cacheID)
 		return clearMemory()
 	}
 
@@ -122,12 +120,15 @@ open class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryPr
 	public func flush() -> Self {
 		fetcherMap.forEach { (key, fetcher) in
 			if fetcher.isDirty, let storedValue = fetcher.storedValue {
-				C.saveToCache(storedValue, key: key, domain: cacheID)
+				cacher.saveToCache(storedValue, key: key, domain: cacheID)
 				fetcher.isDirty = false
 			}
 		}
 		return self
 	}
+
+
+	open var cacher: Cacher<K, T>
 
 
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onKeyFetch`. The time-to-live parameter will be ignored if this method returns `true`.

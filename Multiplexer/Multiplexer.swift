@@ -14,9 +14,6 @@ import Foundation
 /// See README.md for a more detailed discussion.
 ///
 
-public typealias Multiplexer<T: Codable> = MultiplexerBase<T, JSONDiskCacher<String, T>>
-
-
 public var MuxDefaultTTL: TimeInterval = 30 * 60
 
 
@@ -79,7 +76,7 @@ open class MultiplexFetcher<T: Codable> {
 
 
 /// Multiplexer base class that can be combined with a static `Cacher` implementation in a typealias.
-open class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepositoryProtocol {
+open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 
 	///
 	/// Instantiates a `Multiplexer<T>` object with a given `onFetch` block. It's important to ensure that for each given singular object there is only one Multiplexer singleton in the app.
@@ -91,6 +88,7 @@ open class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepos
 	}
 
 	public init(cacheID: String, onFetch: @escaping (@escaping OnResult) -> Void) {
+		self.cacher = JSONDiskCacher<String, T>() // hardcoded for now
 		self.onFetch = onFetch
 		self.cacheID = cacheID
 	}
@@ -123,7 +121,7 @@ open class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepos
 				self.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = self.storedValue ?? C.loadFromCache(key: self.cacheID, domain: nil) {
+				if Self.useCachedResultOn(error: error), let cachedValue = self.storedValue ?? self.cacher.loadFromCache(key: self.cacheID, domain: nil) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					self.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -146,7 +144,7 @@ open class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepos
 	/// Clears the memory and disk caches. Will trigger a full fetch on the next `request(completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
-		C.clearCache(key: cacheID, domain: nil)
+		cacher.clearCache(key: cacheID, domain: nil)
 		return clearMemory()
 	}
 
@@ -155,11 +153,14 @@ open class MultiplexerBase<T: Codable, C: Cacher>: MultiplexFetcher<T>, MuxRepos
 	@discardableResult
 	public func flush() -> Self {
 		if isDirty, let storedValue = storedValue {
-			C.saveToCache(storedValue, key: cacheID, domain: nil)
+			cacher.saveToCache(storedValue, key: cacheID, domain: nil)
 			isDirty = false
 		}
 		return self
 	}
+
+
+	open var cacher: Cacher<String, T>
 
 
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onFetch`. The time-to-live parameter will be ignored if this method returns `true`.

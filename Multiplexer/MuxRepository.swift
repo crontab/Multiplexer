@@ -90,7 +90,7 @@ public class MuxRepository {
 }
 
 
-public extension MultiplexerBase {
+public extension Multiplexer {
 
 	/// Register the `Multiplexer<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()` and `flushAll()` operations. Note that `MuxRepository` retains the object, which means that for non-singleton multiplexer objects `unregister()` should be called prior to freeing it.
 	func register() -> Self {
@@ -105,7 +105,7 @@ public extension MultiplexerBase {
 }
 
 
-public extension MultiplexerMapBase {
+public extension MultiplexerMap {
 
 	/// Register the `MultiplexerMap<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()` and `flushAll()` operations. Note that `MuxRepository` retains the object, which means that for non-singleton multiplexer objects `unregister()` should be called prior to freeing it.
 	func register() -> Self {
