@@ -20,6 +20,10 @@ public extension FileManager {
 		standardDirectory(.documentDirectory, subDirectory: subDirectory, create: create)
 	}
 
+	static func libraryDirectory(subDirectory: String, create: Bool = false) -> URL {
+		standardDirectory(.libraryDirectory, subDirectory: subDirectory, create: create)
+	}
+
 	private static func standardDirectory(_ type: SearchPathDirectory, subDirectory: String, create: Bool = false) -> URL {
 		let result = `default`.urls(for: type, in: .userDomainMask).first!.appendingPathComponent(subDirectory)
 		if create && !`default`.fileExists(atPath: result.path) {
