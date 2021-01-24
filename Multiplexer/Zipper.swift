@@ -85,16 +85,13 @@ extension Zipper {
 
 	// Experimental type-safe zipper constructors
 
-	public convenience init<A, B>(
+	public static func sync<A, B>(
 		_ a: @escaping OnFetch<A>,
 		_ b: @escaping OnFetch<B>,
 		onResults: @escaping (
 			Result<A, Error>,
 			Result<B, Error>) -> Void) {
-		self.init()
-		add(a)
-		add(b)
-		sync { (results) in
+		Zipper().add(a).add(b).sync { (results) in
 			onResults(
 				results[0].map { $0 as! A },
 				results[1].map { $0 as! B }
@@ -103,7 +100,7 @@ extension Zipper {
 	}
 
 
-	public convenience init<A, B, C>(
+	public static func sync<A, B, C>(
 		_ a: @escaping OnFetch<A>,
 		_ b: @escaping OnFetch<B>,
 		_ c: @escaping OnFetch<C>,
@@ -111,11 +108,7 @@ extension Zipper {
 			Result<A, Error>,
 			Result<B, Error>,
 			Result<C, Error>) -> Void) {
-		self.init()
-		add(a)
-		add(b)
-		add(c)
-		sync { (results) in
+		Zipper().add(a).add(b).add(c).sync { (results) in
 			onResults(
 				results[0].map { $0 as! A },
 				results[1].map { $0 as! B },
@@ -125,7 +118,7 @@ extension Zipper {
 	}
 
 
-	public convenience init<A, B, C, D>(
+	public static func sync<A, B, C, D>(
 		_ a: @escaping OnFetch<A>,
 		_ b: @escaping OnFetch<B>,
 		_ c: @escaping OnFetch<C>,
@@ -135,12 +128,7 @@ extension Zipper {
 			Result<B, Error>,
 			Result<C, Error>,
 			Result<D, Error>) -> Void) {
-		self.init()
-		add(a)
-		add(b)
-		add(c)
-		add(d)
-		sync { (results) in
+		Zipper().add(a).add(b).add(c).add(d).sync { (results) in
 			onResults(
 				results[0].map { $0 as! A },
 				results[1].map { $0 as! B },
@@ -151,7 +139,7 @@ extension Zipper {
 	}
 
 
-	public convenience init<A, B, C, D, E>(
+	public static func sync<A, B, C, D, E>(
 		_ a: @escaping OnFetch<A>,
 		_ b: @escaping OnFetch<B>,
 		_ c: @escaping OnFetch<C>,
@@ -163,13 +151,7 @@ extension Zipper {
 			Result<C, Error>,
 			Result<D, Error>,
 			Result<E, Error>) -> Void) {
-		self.init()
-		add(a)
-		add(b)
-		add(c)
-		add(d)
-		add(e)
-		sync { (results) in
+		Zipper().add(a).add(b).add(c).add(d).add(e).sync { (results) in
 			onResults(
 				results[0].map { $0 as! A },
 				results[1].map { $0 as! B },
