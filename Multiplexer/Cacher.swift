@@ -30,6 +30,8 @@ private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 public final class JSONDiskCacher<K: MuxKey, T: Codable>: Cacher<K, T> {
 
+	public override init() { }
+
 	public override func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T? {
 		return try? jsonDecoder.decode(T.self, from: Data(contentsOf: cacheFileURL(key: key, domain: domain, create: false)))
 	}
