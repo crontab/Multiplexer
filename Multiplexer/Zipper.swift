@@ -161,4 +161,31 @@ extension Zipper {
 			)
 		}
 	}
+
+
+	public static func sync<A, B, C, D, E, F>(
+		_ a: @escaping OnFetch<A>,
+		_ b: @escaping OnFetch<B>,
+		_ c: @escaping OnFetch<C>,
+		_ d: @escaping OnFetch<D>,
+		_ e: @escaping OnFetch<E>,
+		_ f: @escaping OnFetch<F>,
+		onResults: @escaping (
+			Result<A, Error>,
+			Result<B, Error>,
+			Result<C, Error>,
+			Result<D, Error>,
+			Result<E, Error>,
+			Result<F, Error>) -> Void) {
+		Zipper().add(a).add(b).add(c).add(d).add(e).add(f).sync { (results) in
+			onResults(
+				results[0].map { $0 as! A },
+				results[1].map { $0 as! B },
+				results[2].map { $0 as! C },
+				results[3].map { $0 as! D },
+				results[4].map { $0 as! E },
+				results[5].map { $0 as! F }
+			)
+		}
+	}
 }
