@@ -14,19 +14,26 @@ let initialLocationIDs = [2459115, 44418, 615702, 650272, 1118370] // NY, London
 
 
 class CityCell: UITableViewCell {
-	@IBOutlet weak var titleLabel: UILabel!
-	@IBOutlet weak var tempLabel: UILabel!
-	@IBOutlet weak var detailLabel: UILabel!
+	@IBOutlet private var titleLabel: UILabel!
+	@IBOutlet private var tempLabel: UILabel!
+	@IBOutlet private var condImageView: UIImageView!
+
+	private var locationID: Int = 0
 
 	func set(locationInfo: FullLocation) {
+		locationID = locationInfo.woeid
 		titleLabel.text = locationInfo.title
 		if let weather = locationInfo.consolidatedWeather.first {
 			tempLabel.text = "\(Int(weather.theTemp))º"
-			detailLabel.text = weather.weatherStateName
+			condImageView.image = nil
+			ImageLoader.main.request(url: URL(string: "https://www.metaweather.com/static/img/weather/png/64/\(weather.weatherStateAbbr).png")!) { (result) in
+				guard locationInfo.woeid == self.locationID else { return }
+				self.condImageView.image = result.success
+			}
 		}
 		else {
 			tempLabel.text = nil
-			detailLabel.text = nil
+			condImageView.image = nil
 		}
 	}
 }
@@ -35,7 +42,7 @@ class CityCell: UITableViewCell {
 
 class CitiesViewController: UITableViewController {
 
-	// Cache weather information per location for 30 minutes. This can be helpful when e.g. re-adding a previously removed city. Pull-to-refresh though causes a refresh of data anyway.
+	// Cache weather information per location for 30 minutes. If the connection is lost, this object will bring the last result stored on the cache.
 	static var fullLocationMux = MultiplexerMap<Int, FullLocation>(onKeyFetch: { (id, onResult) in
 		Backend.fetchWeather(locationId: id, completion: onResult)
 	}).register()
@@ -58,7 +65,7 @@ class CitiesViewController: UITableViewController {
 
 
 	@objc func didPullToRefresh() {
-		refreshLocations(force: true, locationIDs: locations.map { $0.woeid })
+		refreshLocations(force: true, locationIDs: locations.isEmpty ? initialLocationIDs : locations.map { $0.woeid })
 	}
 
 
@@ -82,7 +89,7 @@ class CitiesViewController: UITableViewController {
 			var lastError: Error?
 
 			// Get the results or otherwise store the last error object to be shown as an alert
-			self.locations = results.compactMap({
+			self.locations = results.compactMap {
 				switch $0 {
 				case .failure(let error):
 					lastError = error
@@ -90,7 +97,7 @@ class CitiesViewController: UITableViewController {
 				case .success(let any):
 					return any as? FullLocation
 				}
-			})
+			}
 
 			if let error = lastError {
 				self.alert(error)
@@ -120,9 +127,8 @@ class CitiesViewController: UITableViewController {
 	}
 
 
-	@IBAction func addAction(_ sender: Any) {
-		let addCity = storyboard!.instantiateViewController(withIdentifier: "AddCity") as! AddCityViewController
-		addCity.onLocationSelected = { [weak self] (location) in
+	@IBSegueAction private func addLocationAction(_ coder: NSCoder) -> AddCityViewController? {
+		return AddCityViewController(coder: coder) { [weak self] (location) in
 			guard let self = self else { return }
 			self.locations.removeAll { $0.woeid == location.woeid }
 			self.isRefreshing = true
@@ -134,7 +140,6 @@ class CitiesViewController: UITableViewController {
 				}
 			}
 		}
-		navigationController!.pushViewController(addCity, animated: true)
 	}
 
 

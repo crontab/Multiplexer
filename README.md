@@ -101,7 +101,7 @@ typealias MyCDMultiplexer<T: Codable> = MultiplexerBase<T, CDCacher<T>>
 At run time, you can invalidate the cached object using one of the following methods:
 
 - "Soft refresh": chain the `refresh()` method with a call to `request(completion:)`: the multiplexer will attempt to fetch the object again, but will not discard the existing cached objects in memory or on disk. In case of a failure the older cached object may be used again as a result.
-- "Hard refresh": call `clear()` to discard both memory and disk caches for the given object. The next call to `request(completion:)` will attempt to fetch the object and will fail in case of an error.
+- "Hard refresh": call `clear()` to discard both memory and disk caches for a given object. The next call to `request(completion:)` will attempt to fetch the object and will fail in case of an error.
 
 See also:
 
@@ -175,6 +175,8 @@ More detailed descriptions on each method can be found in the source file [Multi
 
 Both interfaces provide singleton objects called `main` that should be used in your app.
 
+The `request(url:completion:)` and `request(url:progress:completion:)` methods can be called with `completion` set to `nil`, in which case the object is downloaded (if required) but not expanded in memory; this can be useful for e.g. prefetching images without uncompressing them at program startup.
+
 Examples:
 
 ```swift
@@ -190,8 +192,8 @@ MediaLoader.main.request(url: URL(string: audioURL)!) { result in
 	switch result {
 	case .failure(let error)
 		print(error)
-	case .success(let object):
-		self.player = AVPlayer(url: object.fileURL)
+	case .success(let fileURL):
+		self.player = AVPlayer(url: fileURL)
 		self.player.play()
 	}
 }
@@ -212,7 +214,7 @@ More information on each interface and their methods can be found in the source 
 
 By default, the Multiplexer and MultiplexerMap interfaces don't store objects on disk. If you want to keep the objects to ensure they can survive app reboots, enable the `MuxRepository.automaticFlush` option at program startup. This will ensure all registered multiplexers write their data on disk when the app enters background (iOS only).
 
-`MuxRepository.clearAll()` discards all memory and disk objects. This is useful when e.g. the user signs out of your system and you need to make sure no traces are left of data related to the given user in memory or disk.
+`MuxRepository.clearAll()` discards all memory and disk objects. This is useful when e.g. the user signs out of your system and you need to make sure no traces are left of data related to a given user in memory or disk.
 
 Registration example:
 

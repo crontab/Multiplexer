@@ -20,6 +20,8 @@
 		36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FDFF2340CB0100E34B07 /* Zipper.swift */; };
 		36E8FE0C2340CB0100E34B07 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE002340CB0100E34B07 /* Debouncer.swift */; };
 		36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E8FE012340CB0100E34B07 /* FileDownloader.swift */; };
+		36EAB26324D1DAA000956AAD /* LRUCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EAB26224D1DAA000956AAD /* LRUCache.swift */; };
+		36EAB26524D1E9A700956AAD /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EAB26424D1E9A700956AAD /* Common.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,8 @@
 		36E8FE002340CB0100E34B07 /* Debouncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
 		36E8FE012340CB0100E34B07 /* FileDownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
 		36E8FE0E2340D32500E34B07 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		36EAB26224D1DAA000956AAD /* LRUCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LRUCache.swift; sourceTree = "<group>"; };
+		36EAB26424D1E9A700956AAD /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,8 +86,10 @@
 				36E8FDFC2340CB0100E34B07 /* ErrorEx.swift */,
 				36E8FE012340CB0100E34B07 /* FileDownloader.swift */,
 				36E8FDF62340CB0100E34B07 /* FileManagerEx.swift */,
+				36EAB26224D1DAA000956AAD /* LRUCache.swift */,
 				36E8FDFE2340CB0100E34B07 /* StringEx.swift */,
 				369BE853249A21C100178340 /* ResultEx.swift */,
+				36EAB26424D1E9A700956AAD /* Common.swift */,
 				36E8FDDF2340CA0500E34B07 /* Multiplexer.h */,
 				36E8FDE02340CA0500E34B07 /* Info.plist */,
 			);
@@ -177,9 +183,11 @@
 				36E8FE0C2340CB0100E34B07 /* Debouncer.swift in Sources */,
 				36E8FE072340CB0100E34B07 /* Cacher.swift in Sources */,
 				36E8FE052340CB0100E34B07 /* CachingLoader.swift in Sources */,
+				36EAB26524D1E9A700956AAD /* Common.swift in Sources */,
 				36E8FE0A2340CB0100E34B07 /* StringEx.swift in Sources */,
 				36E8FE0D2340CB0100E34B07 /* FileDownloader.swift in Sources */,
 				36E8FE082340CB0100E34B07 /* ErrorEx.swift in Sources */,
+				36EAB26324D1DAA000956AAD /* LRUCache.swift in Sources */,
 				369BE854249A21C100178340 /* ResultEx.swift in Sources */,
 				36E8FE022340CB0100E34B07 /* FileManagerEx.swift in Sources */,
 				36E8FE0B2340CB0100E34B07 /* Zipper.swift in Sources */,
@@ -325,7 +333,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Multiplexer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -352,7 +360,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Multiplexer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

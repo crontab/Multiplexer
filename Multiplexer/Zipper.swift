@@ -22,32 +22,22 @@ public class Zipper {
 
 	public init() { }
 
-	/// Add an execution block that returns a `Result<Any, Error>`
+	/// Add an execution block that returns a `Result<T, Error>`, where generic type T is inferred from the `onFetch` argument.
 	@discardableResult
-	public func add(_ onFetch: @escaping OnFetch<Any>) -> Self {
-		fetchers.append(onFetch)
-		return self
-	}
-
-	/// Add an execution block that returns a `Result<T, Error>`, where generic type T is inferred from the `type` argument. This is useful when the result type can not be inferred automatically from the block definition.
-	@discardableResult
-	public func add<T>(type: T.Type, _ onFetch: @escaping OnFetch<T>) -> Self {
-		return add { (onAnyResult) in
+	public func add<T>(_ onFetch: @escaping OnFetch<T>) -> Self {
+		fetchers.append { (onAnyResult) in
 			onFetch { (result) in
-				switch result {
-				case .failure(let error):
-					onAnyResult(.failure(error))
-				case .success(let value):
-					onAnyResult(.success(value))
-				}
+				// Is this the only way to convert T to Any? The compiler doesn't seem to be happy otherwise.
+				onAnyResult(result.map { $0 })
 			}
 		}
+		return self
 	}
 
 	/// Add a multiplexer object to the zipper. This multiplexer's `request(completion:)` will be called as part of the zipper chain.
 	@discardableResult
 	public func add<T: Codable>(_ multiplexer: Multiplexer<T>) -> Self {
-		return add(type: T.self) { (onResult) in
+		return add { (onResult) in
 			multiplexer.request(completion: onResult)
 		}
 	}
@@ -55,15 +45,15 @@ public class Zipper {
 	/// Add a multiplexer map object to the zipper. This multiplexer's `request(key:completion:)` will be called as part of the zipper chain.
 	@discardableResult
 	public func add<K: MuxKey, T: Codable>(key: K, _ multiplexer: MultiplexerMap<K, T>) -> Self {
-		return add(type: T.self) { (onResult) in
+		return add { (onResult) in
 			multiplexer.request(key: key, completion: onResult)
 		}
 	}
 
 	/// Add a media loader (ImageLoader or MediaLoader) to the zipper. This loader's `request(url:completion:)` will be called as part of the zipper chain.
 	@discardableResult
-	public func add<T: AnyObject>(url: URL, _ mediaLoader: CachingLoaderBase<T>) -> Self {
-		return add(type: T.self) { (onResult) in
+	public func add<T>(url: URL, _ mediaLoader: CachingLoaderBase<T>) -> Self {
+		return add { (onResult) in
 			mediaLoader.request(url: url, completion: onResult)
 		}
 	}
@@ -85,6 +75,117 @@ public class Zipper {
 					completion(results)
 				}
 			})
+		}
+	}
+}
+
+
+
+extension Zipper {
+
+	// Experimental type-safe zipper constructors
+
+	public static func sync<A, B>(
+		_ a: @escaping OnFetch<A>,
+		_ b: @escaping OnFetch<B>,
+		onResults: @escaping (
+			Result<A, Error>,
+			Result<B, Error>) -> Void) {
+		Zipper().add(a).add(b).sync { (results) in
+			onResults(
+				results[0].map { $0 as! A },
+				results[1].map { $0 as! B }
+			)
+		}
+	}
+
+
+	public static func sync<A, B, C>(
+		_ a: @escaping OnFetch<A>,
+		_ b: @escaping OnFetch<B>,
+		_ c: @escaping OnFetch<C>,
+		onResults: @escaping (
+			Result<A, Error>,
+			Result<B, Error>,
+			Result<C, Error>) -> Void) {
+		Zipper().add(a).add(b).add(c).sync { (results) in
+			onResults(
+				results[0].map { $0 as! A },
+				results[1].map { $0 as! B },
+				results[2].map { $0 as! C }
+			)
+		}
+	}
+
+
+	public static func sync<A, B, C, D>(
+		_ a: @escaping OnFetch<A>,
+		_ b: @escaping OnFetch<B>,
+		_ c: @escaping OnFetch<C>,
+		_ d: @escaping OnFetch<D>,
+		onResults: @escaping (
+			Result<A, Error>,
+			Result<B, Error>,
+			Result<C, Error>,
+			Result<D, Error>) -> Void) {
+		Zipper().add(a).add(b).add(c).add(d).sync { (results) in
+			onResults(
+				results[0].map { $0 as! A },
+				results[1].map { $0 as! B },
+				results[2].map { $0 as! C },
+				results[3].map { $0 as! D }
+			)
+		}
+	}
+
+
+	public static func sync<A, B, C, D, E>(
+		_ a: @escaping OnFetch<A>,
+		_ b: @escaping OnFetch<B>,
+		_ c: @escaping OnFetch<C>,
+		_ d: @escaping OnFetch<D>,
+		_ e: @escaping OnFetch<E>,
+		onResults: @escaping (
+			Result<A, Error>,
+			Result<B, Error>,
+			Result<C, Error>,
+			Result<D, Error>,
+			Result<E, Error>) -> Void) {
+		Zipper().add(a).add(b).add(c).add(d).add(e).sync { (results) in
+			onResults(
+				results[0].map { $0 as! A },
+				results[1].map { $0 as! B },
+				results[2].map { $0 as! C },
+				results[3].map { $0 as! D },
+				results[4].map { $0 as! E }
+			)
+		}
+	}
+
+
+	public static func sync<A, B, C, D, E, F>(
+		_ a: @escaping OnFetch<A>,
+		_ b: @escaping OnFetch<B>,
+		_ c: @escaping OnFetch<C>,
+		_ d: @escaping OnFetch<D>,
+		_ e: @escaping OnFetch<E>,
+		_ f: @escaping OnFetch<F>,
+		onResults: @escaping (
+			Result<A, Error>,
+			Result<B, Error>,
+			Result<C, Error>,
+			Result<D, Error>,
+			Result<E, Error>,
+			Result<F, Error>) -> Void) {
+		Zipper().add(a).add(b).add(c).add(d).add(e).add(f).sync { (results) in
+			onResults(
+				results[0].map { $0 as! A },
+				results[1].map { $0 as! B },
+				results[2].map { $0 as! C },
+				results[3].map { $0 as! D },
+				results[4].map { $0 as! E },
+				results[5].map { $0 as! F }
+			)
 		}
 	}
 }

@@ -22,6 +22,8 @@ public protocol MuxRepositoryProtocol: class {
 
 	@discardableResult
 	func clear() -> Self // clear all memory and disk caches
+
+	var cacheID: String { get }
 }
 
 
@@ -51,6 +53,7 @@ public class MuxRepository {
 	/// If set to `true`, automatically calls `flushAll()` each time the app is sent to background. `flushAll()` ensures only "dirty" objects are written to disk, i.e. those that haven't been written yet.
 	public static var automaticFlush: Bool = false {
 		didSet {
+			guard oldValue != automaticFlush else { return }
 			let center = NotificationCenter.default
 			if automaticFlush {
 				center.addObserver(self, selector: #selector(appWillMoveToBackground), name: UIApplication.willResignActiveNotification, object: nil)
@@ -64,9 +67,7 @@ public class MuxRepository {
 	@objc static func appWillMoveToBackground() {
 		guard !repo.isEmpty else { return }
 		flushAll()
-		#if DEBUG
-			print("Flushing \(repo.count) registered multiplexers")
-		#endif
+		DLOG("Flushing \(repo.count) registered multiplexers")
 	}
 
 	#endif
@@ -74,22 +75,22 @@ public class MuxRepository {
 
 	// - - -
 
-	private static var repo: [ObjectIdentifier: MuxRepositoryProtocol] = [:]
+	private static var repo: [String: MuxRepositoryProtocol] = [:]
 
 	fileprivate static func register(mux: MuxRepositoryProtocol) {
-		let id = ObjectIdentifier(mux)
-		precondition(repo[id] == nil, "MuxRepository: duplicate registration")
+		DLOG("Registering multiplexer \(String(describing: mux.self))")
+		let id = mux.cacheID
+		precondition(repo[id] == nil, "MuxRepository: duplicate registration (ID: \(id))")
 		repo[id] = mux
 	}
 
 	fileprivate static func unregister(mux: MuxRepositoryProtocol) {
-		let id = ObjectIdentifier(mux)
-		repo.removeValue(forKey: id)
+		repo.removeValue(forKey: mux.cacheID)
 	}
 }
 
 
-public extension MultiplexerBase {
+public extension Multiplexer {
 
 	/// Register the `Multiplexer<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()` and `flushAll()` operations. Note that `MuxRepository` retains the object, which means that for non-singleton multiplexer objects `unregister()` should be called prior to freeing it.
 	func register() -> Self {
@@ -104,7 +105,7 @@ public extension MultiplexerBase {
 }
 
 
-public extension MultiplexerMapBase {
+public extension MultiplexerMap {
 
 	/// Register the `MultiplexerMap<T>` object with the global repository `MuxRepository` for subsequent use in `clearAll()` and `flushAll()` operations. Note that `MuxRepository` retains the object, which means that for non-singleton multiplexer objects `unregister()` should be called prior to freeing it.
 	func register() -> Self {

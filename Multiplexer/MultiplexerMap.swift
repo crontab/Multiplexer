@@ -14,11 +14,8 @@ import Foundation
 /// See README.md for a more detailed discussion.
 ///
 
-public typealias MultiplexerMap<K: MuxKey, T: Codable> = MultiplexerMapBase<K, T, JSONDiskCacher<K, T>>
-
-
 /// MultiplexerMap base class that can be combined with a static `Cacher` implementation in a typealias.
-public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepositoryProtocol {
+open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	///
@@ -26,8 +23,14 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	/// - parameter onKeyFetch: this block should retrieve an object by its ID, possibly in an asynchronous manner, and return the result y calling the onResult method.
 	///
 
-	public init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
+	public convenience init(onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
+		self.init(cacheID: String(describing: T.self), onKeyFetch: onKeyFetch)
+	}
+
+	public init(cacheID: String, onKeyFetch: @escaping (K, @escaping OnResult) -> Void) {
+		self.cacher = JSONDiskCacher<K, T>() // hardcoded for now
 		self.onKeyFetch = onKeyFetch
+		self.cacheID = cacheID + ".Map"
 	}
 
 	///
@@ -36,12 +39,12 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	/// - parameter completion: the callback block that will receive the result as `Result<T, Error>`.
 	///
 
-	public func request(key: K, completion: @escaping OnResult) {
+	public func request(key: K, completion: OnResult?) {
 		let fetcher = fetcherForKey(key)
 
 		// If the previous result is available in memory and is not expired, return straight away:
-		if !fetcher.refreshFlag, let previousValue = fetcher.previousValue, !fetcher.isExpired(ttl: Self.timeToLive) {
-			completion(.success(previousValue))
+		if !fetcher.refreshFlag, let storedValue = fetcher.storedValue, !fetcher.isExpired(ttl: Self.timeToLive) {
+			completion?(.success(storedValue))
 			return
 		}
 
@@ -60,7 +63,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 				fetcher.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
 
 			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.previousValue ?? C.loadFromCache(key: key, domain: Self.cacheDomain) {
+				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? self.cacher.loadFromCache(key: key, domain: self.cacheID) {
 					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 					fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
 				}
@@ -74,12 +77,13 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 
 	/// "Soft" refresh: the next call to `request(key:completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh(key:)` does not have an immediate effect on any ongoing asynchronous requests for a given `key`.
 	@discardableResult
-	public func refresh(key: K) -> Self {
-		fetcherMap[key]?.refreshFlag = true
+	public func refresh(_ flag: Bool = true, key: K) -> Self {
+		fetcherMap[key]?.refreshFlag = flag
 		return self
 	}
 
 
+	/// Clears the last fetched result for a given `key` stored in memory; doesn't affect the disk-cached value. Can be used in low memory situations. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clearMemory(key: K) -> Self {
 		fetcherMap.removeValue(forKey: key)
@@ -87,6 +91,7 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
+	/// Clears the last fetched results for all keys stored in memory; doesn't affect the disk-cached values. Can be used in low memory situations. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clearMemory() -> Self {
 		fetcherMap = [:]
@@ -94,17 +99,18 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
+	/// Clears the cached value for a given `key` in memory and on disk. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear(key: K) -> Self {
-		C.clearCache(key: key, domain: Self.cacheDomain)
+		cacher.clearCache(key: key, domain: cacheID)
 		return clearMemory(key: key)
 	}
 
 
-	/// Discard the memory and disk caches for the objects
+	/// Clears the memory and disk caches for all keys. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clear() -> Self {
-		C.clearCacheMap(domain: Self.cacheDomain)
+		cacher.clearCacheMap(domain: cacheID)
 		return clearMemory()
 	}
 
@@ -113,8 +119,8 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	@discardableResult
 	public func flush() -> Self {
 		fetcherMap.forEach { (key, fetcher) in
-			if fetcher.isDirty, let previousValue = fetcher.previousValue {
-				C.saveToCache(previousValue, key: key, domain: Self.cacheDomain)
+			if fetcher.isDirty, let storedValue = fetcher.storedValue {
+				cacher.saveToCache(storedValue, key: key, domain: cacheID)
 				fetcher.isDirty = false
 			}
 		}
@@ -122,16 +128,19 @@ public class MultiplexerMapBase<K: MuxKey, T: Codable, C: Cacher>: MuxRepository
 	}
 
 
+	open var cacher: Cacher<K, T>
+
+
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onKeyFetch`. The time-to-live parameter will be ignored if this method returns `true`.
-	public class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
+	open class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
 
 	/// Determines when the Multiplexer should attempt to fetch a fresh copy of the object again. Applies to the memory cache only. Defaults to 30 minutes.
-	public class var timeToLive: TimeInterval { MuxDefaultTTL }
+	open class var timeToLive: TimeInterval { MuxDefaultTTL }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the directory name on disk in the local cache directory. Each object iss stored in the directory as a JSON file with the object ID as a file name, plus the `.json` extension. For DB-based cachers `cacheDomain` can be the table name. By default returns the object class name, e.g. for `MultiplexerMap<UserProfile>` the cache directory name will be "UserProfile.Map" in the cache directory.
-	public class var cacheDomain: String { String(describing: T.self) }
+	open var cacheID: String
 
 
 	private typealias Fetcher = MultiplexFetcher<T>
