@@ -13,7 +13,7 @@ import Foundation
 #endif
 
 
-public protocol MuxRepositoryProtocol: class {
+public protocol MuxRepositoryProtocol: AnyObject {
 	@discardableResult
 	func flush() -> Self // store memory cache on disk
 
