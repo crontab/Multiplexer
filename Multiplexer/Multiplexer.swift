@@ -88,7 +88,7 @@ open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 	}
 
 	public init(cacheID: String, onFetch: @escaping (@escaping OnResult) -> Void) {
-		self.cacher = JSONDiskCacher<String, T>() // hardcoded for now
+		self.cacher = Self.cacherClass.init()
 		self.onFetch = onFetch
 		self.cacheID = cacheID
 	}
@@ -160,9 +160,6 @@ open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 	}
 
 
-	open var cacher: Cacher<String, T>
-
-
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onFetch`. The time-to-live parameter will be ignored if this method returns `true`.
 	open class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
@@ -171,9 +168,14 @@ open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 	open class var timeToLive: TimeInterval { MuxDefaultTTL }
 
 
+	/// Cacher class, overrideable
+	open class var cacherClass: Cacher<String, T>.Type { JSONDiskCacher.self }
+
+
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.
 	open var cacheID: String
 
+	private let cacher: Cacher<String, T>
 
 	private let onFetch: (@escaping OnResult) -> Void
 }

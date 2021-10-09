@@ -13,6 +13,7 @@ public typealias MuxKey = LosslessStringConvertible & Hashable
 
 
 public class Cacher<K: MuxKey, T: Codable> {
+	public required init() { }
 	public func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T? { nil }
 	public func saveToCache<K: MuxKey, T: Codable>(_ result: T, key: K, domain: String?) { }
 	public func clearCache<K: MuxKey>(key: K, domain: String?) { }
@@ -30,7 +31,7 @@ private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 public final class JSONDiskCacher<K: MuxKey, T: Codable>: Cacher<K, T> {
 
-	public override init() { }
+	public required init() { }
 
 	public override func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T? {
 		return try? jsonDecoder.decode(T.self, from: Data(contentsOf: cacheFileURL(key: key, domain: domain, create: false)))
