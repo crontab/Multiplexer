@@ -49,6 +49,7 @@
 		363AD601234130E1003063BC /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		363AD6052341480C003063BC /* AddCityViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCityViewController.swift; sourceTree = "<group>"; };
 		363AD607234152CB003063BC /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		364FBB4827123D5B005C44D5 /* Mux Demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mux Demo.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +84,7 @@
 		363AD5E12340EE5F003063BC /* MultiplexerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				364FBB4827123D5B005C44D5 /* Mux Demo.entitlements */,
 				363AD5FD2340FCD3003063BC /* Models.swift */,
 				363AD601234130E1003063BC /* Request.swift */,
 				363AD5FB2340FAE8003063BC /* Backend.swift */,
@@ -329,6 +331,7 @@
 		363AD5F42340EE5F003063BC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "MultiplexerDemo/Mux Demo.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 639KEQWW6F;
 				INFOPLIST_FILE = MultiplexerDemo/Info.plist;
@@ -339,6 +342,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.MuxDemo;
 				PRODUCT_NAME = "Mux Demo";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -347,6 +351,7 @@
 		363AD5F52340EE5F003063BC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "MultiplexerDemo/Mux Demo.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 639KEQWW6F;
 				INFOPLIST_FILE = MultiplexerDemo/Info.plist;
@@ -357,6 +362,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.MuxDemo;
 				PRODUCT_NAME = "Mux Demo";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
