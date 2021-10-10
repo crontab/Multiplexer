@@ -58,18 +58,10 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in memory for subsequent use
 		onKeyFetch(key) { (newResult) in
 			switch newResult {
-
-			case .success:
-				fetcher.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
-
-			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? self.cacher.loadFromCache(key: key, domain: self.cacheID) {
-					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
-					fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
-				}
-				else {
-					fetcher.triggerCompletions(result: newResult, completionTime: nil)
-				}
+				case .success(let value):
+					self.storeSuccess(key, value: value)
+				case .failure(let error):
+					self.storeFailure(key, error: error)
 			}
 		}
 	}
@@ -158,5 +150,32 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 			fetcherMap[key] = fetcher
 		}
 		return fetcher!
+	}
+
+
+	// MARK: - experimental (see MultiRequester)
+
+	internal func storedValue(_ key: K) -> T? {
+		fetcherMap[key].flatMap {
+			!$0.isExpired(ttl: Self.timeToLive) ? $0.storedValue : nil
+		}
+	}
+
+
+	internal func storeSuccess(_ key: K, value: T) {
+		let fetcher = fetcherForKey(key)
+		fetcher.triggerCompletions(result: .success(value), completionTime: Date().timeIntervalSinceReferenceDate)
+	}
+
+
+	internal func storeFailure(_ key: K, error: Error) {
+		let fetcher = fetcherForKey(key)
+		if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? cacher.loadFromCache(key: key, domain: cacheID) {
+			// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
+			fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
+		}
+		else {
+			fetcher.triggerCompletions(result: .failure(error), completionTime: nil)
+		}
 	}
 }
