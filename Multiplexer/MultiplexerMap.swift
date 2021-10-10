@@ -168,14 +168,17 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	}
 
 
-	internal func storeFailure(_ key: K, error: Error) {
+	@discardableResult
+	internal func storeFailure(_ key: K, error: Error) -> T? {
 		let fetcher = fetcherForKey(key)
 		if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? cacher.loadFromCache(key: key, domain: cacheID) {
 			// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
 			fetcher.triggerCompletions(result: .success(cachedValue), completionTime: nil)
+			return cachedValue
 		}
 		else {
 			fetcher.triggerCompletions(result: .failure(error), completionTime: nil)
+			return nil
 		}
 	}
 }

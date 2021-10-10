@@ -43,7 +43,6 @@ open class MultiplexFetcher<T: Codable> {
 		switch result {
 
 		case .success(let value):
-			// If the completion time was specified, make sure it's newer than the previos one and update the value
 			if let completionTime = completionTime {
 				self.completionTime = completionTime
 			}
