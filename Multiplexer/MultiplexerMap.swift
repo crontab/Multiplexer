@@ -120,6 +120,12 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	}
 
 
+	/// Overrides the currently memory-cached value or creates one for the given key. Useful when e.g. you update the object on the backend and the update method returns a fresh version of the object. Does not trigger completions.
+	public func updateStoredValue(_ value: T, key: K) {
+		fetcherForKey(key).updateStoredValue(value)
+	}
+
+
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onKeyFetch`. The time-to-live parameter will be ignored if this method returns `true`.
 	open class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 

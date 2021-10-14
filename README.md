@@ -92,11 +92,7 @@ By default, `Multiplexer<T>` can store objects as JSON files in the local cache 
 
 In the current implementation, the objects stored on disk can be reused only in one case: when your `onFetch` fails due to a connectivity problem. This behavior is defined in the `useCachedResultOn(error:)` class method that can be overridden in your subclass of `Multiplexer`. For the memory cache, the expiration logic is defined by the class variable `timeToLive`, which defaults to 30 minutes and can also be overridden in your subclass.
 
-The storage method can be changed by defining a class that conforms to `Cacher`, possibly with a generic parameter for the basic object type. For example you can define your own cacher that uses CoreData, called `CDCacher<T>`, then define your new multiplexer class as:
-
-```swift
-typealias MyCDMultiplexer<T: Codable> = MultiplexerBase<T, CDCacher<T>>
-```
+The storage method can be changed by overriding the `cacherClass`  class variable in your subclass of `Multiplexer`. The class should conform to the `Cacher` protocol.
 
 At run time, you can invalidate the cached object using one of the following methods:
 

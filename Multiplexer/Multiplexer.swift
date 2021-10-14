@@ -17,7 +17,7 @@ import Foundation
 public var MuxDefaultTTL: TimeInterval = 30 * 60
 
 
-/// Internal class that's reused in `MultiplexerBase` and `MultiplexerMapBase`
+/// Internal class that's reused in `Multiplexer` and `MultiplexerMap`
 open class MultiplexFetcher<T: Codable> {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
@@ -70,6 +70,12 @@ open class MultiplexFetcher<T: Codable> {
 		completionTime = 0
 		storedValue = nil
 		return self
+	}
+
+	/// Overrides the currently memory-cached value. Useful when e.g. you update the object on the backend and the update method returns a fresh version of the object. Does not trigger completions.
+	public func updateStoredValue(_ value: T) {
+		storedValue = value
+		completionTime = Date().timeIntervalSinceReferenceDate
 	}
 }
 
