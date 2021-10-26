@@ -70,7 +70,9 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	/// "Soft" refresh: the next call to `request(key:completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh(key:)` does not have an immediate effect on any ongoing asynchronous requests for a given `key`.
 	@discardableResult
 	public func refresh(_ flag: Bool = true, key: K) -> Self {
-		fetcherMap[key]?.refreshFlag = flag
+		if flag {
+			fetcherMap[key]?.refreshFlag = flag
+		}
 		return self
 	}
 
