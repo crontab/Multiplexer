@@ -46,14 +46,14 @@ open class MultiRequester<K: LosslessStringConvertible, T: Codable & Identifiabl
 
 				case .success(let newValues):
 					newValues.forEach {
-						self.multiplexerMap.storeSuccess($0.id, value: $0)
+						self.multiplexerMap.storeSuccess($0, key: $0.id)
 						values.append($0)
 					}
 					completion?(values, nil)
 
 				case .failure(let error):
 					remainingKeys.forEach {
-						self.multiplexerMap.storeFailure($0, error: error).map {
+						self.multiplexerMap.storeFailure(error, key: $0).map {
 							values.append($0)
 						}
 					}
