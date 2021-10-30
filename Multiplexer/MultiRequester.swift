@@ -45,10 +45,8 @@ open class MultiRequester<K: LosslessStringConvertible, T: Codable & Identifiabl
 			switch newResult {
 
 				case .success(let newValues):
-					newValues.forEach {
-						self.multiplexerMap.storeSuccess($0, key: $0.id)
-						values.append($0)
-					}
+					self.storeSuccess(newValues)
+					values += newValues
 					completion?(values, nil)
 
 				case .failure(let error):
@@ -59,6 +57,13 @@ open class MultiRequester<K: LosslessStringConvertible, T: Codable & Identifiabl
 					}
 					completion?(values, error)
 			}
+		}
+	}
+
+
+	public func storeSuccess(_ values: [T]) {
+		values.forEach {
+			self.multiplexerMap.storeSuccess($0, key: $0.id)
 		}
 	}
 
