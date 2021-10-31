@@ -23,13 +23,13 @@ open class MultiRequester<K: LosslessStringConvertible, T: Codable & Identifiabl
 
 
 	/// This method attempts to retrieve objects associated with the set of keys [K]. The number of the results is not guaranteed to be the same as the number of keys, neither is the order guaranteed to be the same. If the fetcher returns an error, this function may return some number of previously cached results but will also return the error object (it's why the completion has both result and error arguments). The result set is not optional but may be empty if neither the fetcher nor the caching system have any new values.
-	public func request(keys: [K], completion: (([T], Error?) -> Void)?) {
+	public func request(keys: [K], completion: (([K: T], Error?) -> Void)?) {
 
 		// See if there are any good non-expired cached values in the map object; also build the set of keys to be used in a call to the user's fetcher function.
-		var values: [T] = []
-		let remainingKeys = keys.filter {
-			multiplexerMap.storedValue($0).map { value -> T? in
-				values.append(value)
+		var values: [K: T] = [:]
+		let remainingKeys = keys.filter { key in
+			multiplexerMap.storedValue(key).map { value -> T? in
+				values[key] = value
 				return value
 			} == nil
 		}
@@ -45,14 +45,16 @@ open class MultiRequester<K: LosslessStringConvertible, T: Codable & Identifiabl
 			switch newResult {
 
 				case .success(let newValues):
-					self.storeSuccess(newValues)
-					values += newValues
+					newValues.forEach { value in
+						self.multiplexerMap.storeSuccess(value, key: value.id)
+						values[value.id] = value
+					}
 					completion?(values, nil)
 
 				case .failure(let error):
-					remainingKeys.forEach {
-						self.multiplexerMap.storeFailure(error, key: $0).map {
-							values.append($0)
+					remainingKeys.forEach { key in
+						self.multiplexerMap.storeFailure(error, key: key).map { value in
+							values[key] = value
 						}
 					}
 					completion?(values, error)
