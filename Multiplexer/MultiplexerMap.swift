@@ -75,6 +75,14 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	}
 
 
+	/// "Soft" refresh of all stored elements: the next call to `request(key:completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh(key:)` does not have an immediate effect on any ongoing asynchronous requests.
+	public func refreshAll(_ flag: Bool = true) {
+		fetcherMap.forEach { key, value in
+			value.refreshFlag = flag
+		}
+	}
+
+
 	/// Clears the last fetched result for a given `key` stored in memory; doesn't affect the disk-cached value. Can be used in low memory situations. Will trigger a full fetch on the next `request(key:completion:)` call.
 	@discardableResult
 	public func clearMemory(key: K) -> Self {
