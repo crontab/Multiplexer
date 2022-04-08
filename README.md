@@ -264,7 +264,7 @@ class UsernameViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
-		usernameDebouncer = Debouncer(delay: 1) { [weak self] in
+		usernameDebouncer = Debouncer(delay: 1) { [weak self] _ in
 			guard let self = self else { return }
 			Backend.checkUsernameAvailability(username: self.usernameField.text) { [weak self] result in
 				self?.usernameTakenView.isHidden = result
@@ -282,16 +282,14 @@ class UsernameViewController: UIViewController {
 }
 ```
 
-A convenience subclass of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is assigned, and if the new value is different from the previous one.
+A convenience variant of Debouncer, `DebouncerVar<T>` adds a value of type T that triggers `touch()` every time the value is assigned, and if the new value is different from the previous one.
 
 More information on each interface and their methods can be found in the source file [Debouncer.swift](Multiplexer/Debouncer.swift).
 
 <a name="packages"><a>
 ## Packages
 
-None at the moment. I think git submodules are still the best way to integrate 3rd party code into your project, as you don't need to learn any new tools along with their shortcomings, quirks, glitches and a burden of maintenance that can be pretty time consuming (hello, Cocoapods). If you already know git's shortcomings, quirks (glitches?) then use submodules, I think they are worth knowing, mastering and using with 3rd party source code.
-
-The Swift Package Manager, however, is a possibility that will be considered at one point.
+None at the moment. I think git submodules are still a great way to integrate 3rd party code into your project. The Swift Package Manager, however, is a possibility that will be considered at one point.
 
 <a name="building"></a>
 ## Building and linking
@@ -305,4 +303,4 @@ Enjoy your coding!
 <a name="intro"></a>
 ## Authors
 
-MuxUtils is developed by [Hovik Melikyan](https://github.com/crontab).
+Multiplexer is developed by [Hovik Melikyan](https://github.com/crontab).

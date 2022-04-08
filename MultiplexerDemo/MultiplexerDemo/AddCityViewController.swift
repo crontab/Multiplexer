@@ -31,7 +31,7 @@ class AddCityViewController: UITableViewController, UISearchBarDelegate {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
-		debouncer = DebouncerVar("", delay: 1) { [weak self] in
+		debouncer = DebouncerVar("", delay: 1) { [weak self] _ in
 			if let self = self {
 				self.performSearch(self.searchBar.text ?? "")
 			}
