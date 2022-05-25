@@ -9,7 +9,7 @@
 import Foundation
 
 #if !NO_UIKIT && os(iOS)
-	import UIKit
+	import UIKit.UIApplication
 #endif
 
 

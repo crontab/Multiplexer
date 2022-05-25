@@ -16,7 +16,7 @@ import Foundation
 		import Cocoa
 		public typealias UIImage = NSImage
 	#elseif os(iOS)
-		import UIKit
+		import UIKit.UIImage
 	#endif
 #endif
 
