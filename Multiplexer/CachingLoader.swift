@@ -78,7 +78,7 @@ let CACHING_LOADER_ERROR_DOMAIN = "MuxCachingLoaderError"
 
 
 /// Internal class that should be subclassed with CachingLoaderProtocol methods overridden.
-public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol {
+open class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol {
 	public typealias OnResult = (Result<T, Error>) -> Void
 
 	/// Instantiates a CachingLoader object with the memory capacity parameter. Internal.
@@ -182,12 +182,12 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 	}
 
 
-	public var cacheID: String {
+	open var cacheID: String {
 		preconditionFailure()
 	}
 
 
-	public func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (T?) -> Void) {
+	open func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (T?) -> Void) {
 		preconditionFailure()
 	}
 
@@ -265,11 +265,11 @@ public class CachingLoaderBase<T>: CachingLoaderProtocol, MuxRepositoryProtocol 
 
 	private var completions: [URL: [OnResult?]] = [:]
 
-	private func cacheFileURLFor(url: URL, create: Bool) -> URL {
+	open func cacheFileURLFor(url: URL, create: Bool) -> URL {
 		return cacheSubdirectory(create: create).appendingPathComponent(url.absoluteString.toURLSafeHash(max: 32)).appendingPathExtension(url.pathExtension)
 	}
 
-	private func cacheSubdirectory(create: Bool) -> URL {
+	open func cacheSubdirectory(create: Bool) -> URL {
 		return FileManager.cachesDirectory(subDirectory: "Mux/" + cacheID, create: create)
 	}
 }
