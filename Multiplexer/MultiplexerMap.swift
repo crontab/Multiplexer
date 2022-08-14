@@ -59,9 +59,9 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 		onKeyFetch(key) { (newResult) in
 			switch newResult {
 				case .success(let value):
-					self.storeSuccess(key, value: value)
+					self.storeSuccess(value, key: key)
 				case .failure(let error):
-					self.storeFailure(key, error: error)
+					self.storeFailure(error, key: key)
 			}
 		}
 	}
@@ -72,6 +72,18 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	public func refresh(_ flag: Bool = true, key: K) -> Self {
 		if flag {
 			fetcherMap[key]?.refreshFlag = true
+		}
+		return self
+	}
+
+
+	/// "Soft" refresh: the next call to `request(key:completion:)` will attempt to retrieve the object again, without discarding the caches in case of a failure. `refresh()` does not have an immediate effect on any ongoing asynchronous requests.
+	@discardableResult
+	public func refresh(_ flag: Bool = true) -> Self {
+		if flag {
+			fetcherMap.values.forEach {
+				$0.refreshFlag = true
+			}
 		}
 		return self
 	}
@@ -130,12 +142,6 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	}
 
 
-	/// Overrides the currently memory-cached value or creates one for the given key. Useful when e.g. you update the object on the backend and the update method returns a fresh version of the object. Does not trigger completions.
-	public func updateStoredValue(_ value: T, key: K) {
-		fetcherForKey(key).updateStoredValue(value)
-	}
-
-
 	/// Defines in which cases a cached object should be returned to the caller in case of a failure to retrieve it in `onKeyFetch`. The time-to-live parameter will be ignored if this method returns `true`.
 	open class func useCachedResultOn(error: Error) -> Bool { error.isConnectivityError }
 
@@ -178,14 +184,13 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 	}
 
 
-	internal func storeSuccess(_ key: K, value: T) {
-		let fetcher = fetcherForKey(key)
-		fetcher.triggerCompletions(result: .success(value), completionTime: Date().timeIntervalSinceReferenceDate)
+	public func storeSuccess(_ value: T, key: K) {
+		fetcherForKey(key).storeSuccess(value)
 	}
 
 
 	@discardableResult
-	internal func storeFailure(_ key: K, error: Error) -> T? {
+	public func storeFailure(_ error: Error, key: K) -> T? {
 		let fetcher = fetcherForKey(key)
 		if Self.useCachedResultOn(error: error), let cachedValue = fetcher.storedValue ?? cacher.loadFromCache(key: key, domain: cacheID) {
 			// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time

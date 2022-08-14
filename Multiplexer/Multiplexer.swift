@@ -72,10 +72,9 @@ open class MultiplexFetcher<T: Codable> {
 		return self
 	}
 
-	/// Overrides the currently memory-cached value. Useful when e.g. you update the object on the backend and the update method returns a fresh version of the object. Does not trigger completions.
-	public func updateStoredValue(_ value: T) {
-		storedValue = value
-		completionTime = Date().timeIntervalSinceReferenceDate
+
+	public func storeSuccess(_ value: T) {
+		triggerCompletions(result: .success(value), completionTime: Date().timeIntervalSinceReferenceDate)
 	}
 }
 
@@ -119,20 +118,12 @@ open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 		}
 
 		// Call the abstract method that does the job of retrieving the object, presumably asynchronously; store the result in memory for subsequent use
-		onFetch { (newResult) in
+		onFetch { newResult in
 			switch newResult {
-
-			case .success:
-				self.triggerCompletions(result: newResult, completionTime: Date().timeIntervalSinceReferenceDate)
-
-			case .failure(let error):
-				if Self.useCachedResultOn(error: error), let cachedValue = self.storedValue ?? self.cacher.loadFromCache(key: self.cacheID, domain: nil) {
-					// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
-					self.triggerCompletions(result: .success(cachedValue), completionTime: nil)
-				}
-				else {
-					self.triggerCompletions(result: newResult, completionTime: nil)
-				}
+				case .success(let value):
+					self.storeSuccess(value)
+				case .failure(let error):
+					self.storeFailure(error)
 			}
 		}
 	}
@@ -183,4 +174,20 @@ open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 	private let cacher: Cacher<String, T>
 
 	private let onFetch: (@escaping OnResult) -> Void
+
+
+	// MARK: - experimental (see MultiRequester)
+
+	@discardableResult
+	public func storeFailure(_ error: Error) -> T? {
+		if Self.useCachedResultOn(error: error), let cachedValue = storedValue ?? cacher.loadFromCache(key: cacheID, domain: nil) {
+			// Keep the loaded value in memory but don't touch completionTime so that a new attempt at retrieving can be made next time
+			triggerCompletions(result: .success(cachedValue), completionTime: nil)
+			return cachedValue
+		}
+		else {
+			triggerCompletions(result: .failure(error), completionTime: nil)
+			return nil
+		}
+	}
 }
