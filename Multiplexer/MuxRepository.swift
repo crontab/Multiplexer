@@ -37,9 +37,7 @@ public class MuxRepository {
 
 	/// Writes all memory-cached objects to disk for each of the registered Multiplexer objects. The default implementations of `Multiplexer<T>` and `MultiplexerMap<T>` use simple file-based JSON caching. On iOS MuxRepository can call this method automatically when the app is sent to background if you set `MuxRepository.automaticaFlush` to `true` (presumably at program startup).
 	public static func flushAll() {
-		repo.values.forEach {
-			$0.flush()
-		}
+		repo.values.forEach { $0.flush() }
 	}
 
 	/// Free all memory-cached objects. This will force all multiplexer objects make a new fetch on the next call to `request(completion:)`. This method can be called on memory warnings coming from the OS.
@@ -47,35 +45,29 @@ public class MuxRepository {
 		repo.values.forEach { $0.clearMemory() }
 	}
 
-
-	#if !NO_UIKIT && os(iOS)
-
 	/// If set to `true`, automatically calls `flushAll()` each time the app is sent to background. `flushAll()` ensures only "dirty" objects are written to disk, i.e. those that haven't been written yet.
 	public static var automaticFlush: Bool = false {
 		didSet {
+#if !NO_UIKIT && os(iOS)
 			guard oldValue != automaticFlush else { return }
 			let center = NotificationCenter.default
 			if automaticFlush {
-				center.addObserver(self, selector: #selector(appWillMoveToBackground), name: UIApplication.willResignActiveNotification, object: nil)
+				observer = center.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: nil) { _ in
+					flushAll()
+					DLOG("Flushing \(repo.count) registered multiplexers")
+				}
 			}
-			else {
-				center.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+			else if let observer {
+				center.removeObserver(observer)
 			}
+#endif
 		}
 	}
-
-	@objc static func appWillMoveToBackground() {
-		guard !repo.isEmpty else { return }
-		flushAll()
-		DLOG("Flushing \(repo.count) registered multiplexers")
-	}
-
-	#endif
-
 
 	// - - -
 
 	private static var repo: [String: MuxRepositoryProtocol] = [:]
+	private static var observer: NSObjectProtocol?
 
 	fileprivate static func register(mux: MuxRepositoryProtocol) {
 		DLOG("Registering multiplexer \(String(describing: mux.self))")
