@@ -2,6 +2,8 @@
 # Multiplexer Utilities
 ### Async utilities with caching for Swift
 
+*Discontinued. See [AsyncMux](https://github.com/crontab/AsyncMux), a more modern variation of this library re-written for Swift's Structure Concurrency.*
+
 #### Table of contents
 
 - [Introduction](#intro)
