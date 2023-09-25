@@ -165,13 +165,13 @@ open class Multiplexer<T: Codable>: MultiplexFetcher<T>, MuxRepositoryProtocol {
 
 
 	/// Cacher class, overrideable
-	open class var cacherClass: Cacher<String, T>.Type { JSONDiskCacher.self }
+	open class var cacherClass: Cacher.Type { JSONDiskCacher.self }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the file name on disk in the local cache directory, plus the `.json` extension. For DB-based cachers this can be a index key for retrieving the object from the table of global objects. By default returns the object class name, e.g. for `Multiplexer<UserProfile>` the file name will be "UserProfile.json" in the cache directory.
 	open var cacheID: String
 
-	private let cacher: Cacher<String, T>
+	private let cacher: Cacher
 
 	private let onFetch: (@escaping OnResult) -> Void
 

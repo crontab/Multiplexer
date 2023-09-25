@@ -12,7 +12,7 @@ import Foundation
 public typealias MuxKey = LosslessStringConvertible & Hashable
 
 
-public class Cacher<K: MuxKey, T: Codable> {
+public class Cacher {
 	public required init() { }
 	public func loadFromCache<K: MuxKey, T: Codable>(key: K, domain: String?) -> T? { nil }
 	public func saveToCache<K: MuxKey, T: Codable>(_ result: T, key: K, domain: String?) { }
@@ -21,7 +21,7 @@ public class Cacher<K: MuxKey, T: Codable> {
 }
 
 
-public final class NoCacher<K: MuxKey, T: Codable>: Cacher<K, T> {
+public final class NoCacher: Cacher {
 }
 
 
@@ -29,7 +29,7 @@ private let jsonDecoder: JSONDecoder = { JSONDecoder() }()
 private let jsonEncoder: JSONEncoder = { JSONEncoder() }()
 
 
-public final class JSONDiskCacher<K: MuxKey, T: Codable>: Cacher<K, T> {
+public final class JSONDiskCacher: Cacher {
 
 	public required init() { }
 

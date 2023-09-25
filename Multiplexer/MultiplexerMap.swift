@@ -141,7 +141,7 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 
 
 	/// Cacher class, overrideable
-	open class var cacherClass: Cacher<K, T>.Type { JSONDiskCacher.self }
+	open class var cacherClass: Cacher.Type { JSONDiskCacher.self }
 
 
 	/// Internal method that is used by the caching interface. For `JSONDiskCacher` this becomes the directory name on disk in the local cache directory. Each object iss stored in the directory as a JSON file with the object ID as a file name, plus the `.json` extension. For DB-based cachers `cacheDomain` can be the table name. By default returns the object class name, e.g. for `MultiplexerMap<UserProfile>` the cache directory name will be "UserProfile.Map" in the cache directory.
@@ -149,7 +149,7 @@ open class MultiplexerMap<K: MuxKey, T: Codable>: MuxRepositoryProtocol {
 
 	private typealias Fetcher = MultiplexFetcher<T>
 
-	private let cacher: Cacher<K, T>
+	private let cacher: Cacher
 
 	private let onKeyFetch: (K, @escaping OnResult) -> Void
 
