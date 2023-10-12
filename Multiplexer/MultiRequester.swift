@@ -9,6 +9,14 @@
 import Foundation
 
 
+#if !canImport(Foundation.Identifiable)
+public protocol Identifiable<ID> {
+	associatedtype ID : Hashable
+	var id: Self.ID { get }
+}
+#endif
+
+
 /// EXPERIMENTAL
 /// If your backend supports multiple-ID requests (such as  e.g.`/profiles/[id1,id2]`), then MultiRequester can be used in combination with an existing MultiplexerMap object to combine single and multi-requests into the same caching infrastructure. Multi-ID requests made via MultiRequester's `request(...)` method can update the map linked to it and also reuse the cached values stored by the map. Thus, objects will be cached locally regardless of whether they were requested via singular endpoints or multi-ID ones; and on the other hand, multi-ID requests can save bandwidth by reusing some of the objects already cached and requesting fewer ID's (or even none) from the backend.
 
