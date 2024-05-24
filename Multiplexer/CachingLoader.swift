@@ -30,10 +30,8 @@ public class ImageLoader: CachingLoaderBase<UIImage> {
 
 	public override var cacheID: String { "Images" }
 
-	private static let ioQueue = DispatchQueue(label: "com.melikyan.CachingImageLoader", qos: .background)
-
 	public override func prepareMemoryObject(cacheFileURL: URL, completion: @escaping (UIImage?) -> Void) {
-		Self.ioQueue.async {
+		Task {
 			let image = UIImage(contentsOfFile: cacheFileURL.path)
 			if let image = image {
 				// Make sure the image is decompressed on the background thread
