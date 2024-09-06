@@ -11,9 +11,14 @@ import Foundation
 
 extension Error {
 	var isConnectivityError: Bool {
-		if (self as NSError).domain == NSURLErrorDomain {
-			return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((self as NSError).code)
+		let nsError = self as NSError
+		switch nsError.domain {
+			case NSURLErrorDomain:
+				return [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost].contains((self as NSError).code)
+			case "RevenueCat.ErrorCode":
+				return nsError.code == 35
+			default:
+				return false
 		}
-		return false
 	}
 }
